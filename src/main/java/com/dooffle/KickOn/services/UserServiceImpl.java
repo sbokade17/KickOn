@@ -228,7 +228,6 @@ public class UserServiceImpl implements UserService {
             patchObject.remove("userId");
             patchObject.remove("encryptedPassword");
             patchObject.remove("roles");
-            patchObject.remove("email");
             user = ObjectMapperUtils.map(patchObject, user);
             userRepository.save(user);
             return ObjectMapperUtils.map(user, UserDto.class);

@@ -27,4 +27,5 @@ public class EventDto {
     private Set<Long> amenitiesIds;
     private String capacity;
     private String type;
+    private String subType;
 }

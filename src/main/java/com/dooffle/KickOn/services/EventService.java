@@ -7,5 +7,7 @@ import java.util.List;
 public interface EventService {
     EventDto createEvent(EventDto eventDto);
 
-    List<EventDto> getAllEvents();
+    List<EventDto> getAllEvents(String search);
+
+    void deleteById(Long eventId);
 }

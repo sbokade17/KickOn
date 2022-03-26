@@ -27,11 +27,17 @@ public class EventEntity implements Serializable {
     @SequenceGenerator(name = "event_id_sequence", sequenceName = "event_id_sequence")
     private long eventId;
 
+    @Column
     private String description;
+    @Column
     private String name;
+    @Column
     private String location;
+    @Column
     private Calendar date;
+    @Column
     private String contact;
+    @Column
     private String registerLink;
 
     @ManyToMany(fetch = FetchType.EAGER,
@@ -43,8 +49,12 @@ public class EventEntity implements Serializable {
             joinColumns = { @JoinColumn(name = "eventId")},
             inverseJoinColumns = { @JoinColumn(name = "id")})
     private Set<AmenitiesEntity> amenities;
+    @Column
     private String capacity;
+    @Column
     private String type;
+    @Column
+    private String subType;
 
 
 }

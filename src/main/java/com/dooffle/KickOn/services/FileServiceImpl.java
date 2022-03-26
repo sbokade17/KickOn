@@ -84,7 +84,11 @@ public class FileServiceImpl implements FileService {
     public Set<FileDto> getBannersByEventId(long id) {
 
         Set<FileEntity> fileEntities = fileRepository.findByEventId(id);
-        return new HashSet<>(ObjectMapperUtils.mapAll(fileEntities, FileDto.class));
+        HashSet<FileDto> fileDtos = new HashSet<>(ObjectMapperUtils.mapAll(fileEntities, FileDto.class));
+        fileDtos.forEach(fileDto -> {
+            fileDto.setFileByte(CommonUtil.decompressBytes(fileDto.getFileByte()));
+        });
+        return fileDtos;
     }
 
 

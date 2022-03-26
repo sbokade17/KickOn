@@ -28,10 +28,10 @@ public class UserEntity implements Serializable {
     @Column(nullable = false, unique = true)
     private String userId;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String firstName;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String lastName;
 
     @Column(length = 120, unique = true)

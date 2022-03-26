@@ -90,6 +90,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cz.jirutka.rsql</groupId>
+            <artifactId>rsql-parser</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rometools</groupId>
+            <artifactId>rome</artifactId>
+            <version>1.10.0</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
