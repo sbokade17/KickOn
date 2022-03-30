@@ -10,4 +10,6 @@ public interface EventService {
     List<EventDto> getAllEvents(String search);
 
     void deleteById(Long eventId);
+
+    EventDto getEventById(Long eventId);
 }

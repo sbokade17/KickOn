@@ -100,6 +100,19 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new StatusDto(Constants.SUCCESS));
     }
 
+    @GetMapping(value = "/{mobile}/otp/{otp}")
+    public ResponseEntity<StatusDto> validateOtp(@PathVariable("mobile") String mobile, @PathVariable("otp") String otp) throws NoSuchMethodException {
+
+        if (mobile == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new StatusDto(Constants.FAILED));
+        }
+
+            userService.validateMobileOtp(mobile, otp);
+
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new StatusDto(Constants.SUCCESS));
+    }
+
     @PostMapping(value = "/validateOtp/reset")
     public ResponseEntity<CreateUserResponseModel> validateOtpVerifyAccount(@Valid @RequestBody ValidateOtpRequestModel validateOtpRequestModel) {
         ModelMapper modelMapper = new ModelMapper();

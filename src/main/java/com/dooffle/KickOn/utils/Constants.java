@@ -17,4 +17,8 @@ public class Constants {
     public static final String VENDOR = "VENDOR";
     public static final String CANCELLED = "CANCELLED";
     public static final String USER = "USER";
+    public static final String TURF = "turf";
+    public static final String TOURNAMENT = "tournament";
+    public static final String TRIAL = "trial";
+    public static final String FEED = "Feed";
 }

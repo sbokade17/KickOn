@@ -76,5 +76,18 @@ public class EventServiceImpl implements EventService{
         }
     }
 
+    @Override
+    public EventDto getEventById(Long eventId) {
+        try {
+            EventEntity eventEntity = eventRepository.findById(eventId).get();
+            EventDto responseDto = ObjectMapperUtils.map(eventEntity, EventDto.class);
+            responseDto.setBanners(fileService.getBannersByEventId(eventEntity.getEventId()));
+            return responseDto;
+        }catch (RuntimeException e) {
+            throw new CustomAppException(HttpStatus.NOT_FOUND, "Event with Id " + eventId + " not found!");
+        }
+
+    }
+
 
 }

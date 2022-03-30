@@ -35,4 +35,6 @@ public interface UserService extends UserDetailsService {
     void setUserKycDone();
 
     List<UserDto> getPendingVendors();
+
+    void validateMobileOtp(String mobile, String otp);
 }

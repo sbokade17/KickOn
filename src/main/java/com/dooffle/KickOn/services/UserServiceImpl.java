@@ -25,6 +25,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.web.client.RestTemplate;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
@@ -137,13 +138,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendOtpOnMobile(String userInput) throws NoSuchMethodException {
-        throw new NoSuchMethodException();
+
+
+        OtpEntity otpEntity=otpRepository.findByMobile(userInput);
+
+        if(null!=otpEntity && otpEntity.getValidity().before(Calendar.getInstance())){
+            otpRepository.deleteById(otpEntity.getId());
+        }
+
+        String otp=CommonUtil.getRandomNumberString();
+        otpEntity = new OtpEntity();
+        otpEntity.setOtp(otp);
+        otpEntity.setMobile(userInput);
+        otpEntity.setEmail("NA");
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 5);
+        otpEntity.setValidity(calendar); //5 minutes validity
+        otpRepository.save(otpEntity);
+        final String uri = "http://smslogin.pcexpert.in/api/mt/SendSMS?DCS=0&flashsms=0&user=kickon&password=846342&senderid=KICKON&channel=Trans&number=8421145676&text=Welcome User, Use "+otp+" to kick start the World of Football. Please do not share this OTP. Team KickOn Football&route=67";
+
+        RestTemplate restTemplate = new RestTemplate();
+        Map result = restTemplate.getForObject(uri, Map.class);
+        System.out.println(result.keySet());
     }
 
     @Override
     public UserDto validateOtp(OtpDto otpDto) {
         UserDto userDto = null;
-        OtpEntity otpEntity=otpRepository.findByEmail(otpDto.getEmail());
+        OtpEntity otpEntity= null;
+        if(null!=otpDto){
+            otpEntity=otpRepository.findByEmail(otpDto.getEmail());
+        }else {
+            otpEntity=otpRepository.findByMobile(otpDto.getMobile());
+        }
+
         if(null!=otpEntity){
             if( otpEntity.getValidity().before(new Date(System.currentTimeMillis()))){
                 throw new CustomAppException(HttpStatus.BAD_REQUEST, "OTP has expired");
@@ -254,6 +282,25 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getPendingVendors() {
         List<UserEntity> userEntities = userRepository.findByIsVerifiedAndIsKycDone(false,true);
         return ObjectMapperUtils.mapAll(userEntities, UserDto.class);
+    }
+
+
+    @Override
+    public void validateMobileOtp(String mobile, String otp) {
+        OtpEntity otpEntity= otpRepository.findByMobile(mobile);
+
+
+        if(null!=otpEntity){
+            if( otpEntity.getValidity().before(new Date(System.currentTimeMillis()))){
+                throw new CustomAppException(HttpStatus.BAD_REQUEST, "OTP has expired");
+            }
+            if(!otp.equals(otpEntity.getOtp())){
+                throw new CustomAppException(HttpStatus.BAD_REQUEST, "Incorrect OTP");
+            }
+            otpRepository.deleteById(otpEntity.getId());
+
+        }
+
     }
 
     @Override

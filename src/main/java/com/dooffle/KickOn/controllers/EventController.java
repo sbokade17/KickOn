@@ -40,6 +40,18 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(eventDtos);
     }
 
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventDto> getEventById(@PathVariable("eventId") Long eventId) throws IOException {
+        try{
+
+            EventDto eventDto = eventService.getEventById(eventId);
+            return ResponseEntity.status(HttpStatus.OK).body(eventDto);
+        }catch (RuntimeException e){
+            throw new CustomAppException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+
+    }
+
     @DeleteMapping("/{eventId}")
     public ResponseEntity<StatusDto> deleteFileById(@PathVariable("eventId") Long eventId) throws IOException {
         try{
