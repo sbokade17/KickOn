@@ -12,4 +12,6 @@ public interface EventService {
     void deleteById(Long eventId);
 
     EventDto getEventById(Long eventId);
+
+    void addLike(Long id);
 }

@@ -55,6 +55,8 @@ public class EventEntity implements Serializable {
     private String type;
     @Column
     private String subType;
+    @Column
+    private Integer likes = 0;
 
 
 }

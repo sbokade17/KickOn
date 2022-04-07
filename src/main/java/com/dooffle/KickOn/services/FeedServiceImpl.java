@@ -1,35 +1,44 @@
 package com.dooffle.KickOn.services;
 
 import com.dooffle.KickOn.data.FeedEntity;
+import com.dooffle.KickOn.data.LikeEntity;
+import com.dooffle.KickOn.data.UserEntity;
 import com.dooffle.KickOn.dto.FeedDto;
+import com.dooffle.KickOn.dto.UserDto;
 import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.repository.FeedRepository;
+import com.dooffle.KickOn.repository.LikeRepository;
+import com.dooffle.KickOn.utils.CommonUtil;
+import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import javax.transaction.Transactional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class FeedServiceImpl implements FeedService{
+@Transactional
+public class FeedServiceImpl implements FeedService {
 
     @Autowired
     FeedRepository feedRepository;
+
+    @Autowired
+    LikeRepository likeRepository;
 
     @Override
     public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos) {
         try {
             Set<String> urlSet = feedDtos.stream().map(x -> x.getLink()).collect(Collectors.toSet());
-            List<FeedEntity> feeds =feedRepository.findAllByLinkIn(urlSet);
+            List<FeedEntity> feeds = feedRepository.findAllByLinkIn(urlSet);
             Set<String> existingFeeds = feeds.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedDto> feedsToBeAddedToDB = feedDtos.stream().filter(x -> !existingFeeds.contains(x.getLink())).collect(Collectors.toList());
             feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
-            return ObjectMapperUtils.mapAll(feedRepository.findAllByLinkInOrderByDateDesc(urlSet), FeedDto.class);
-        }catch (RuntimeException re){
+            return ObjectMapperUtils.mapAll(feedRepository.findTop50ByLinkInOrderByDateDesc(urlSet), FeedDto.class);
+        } catch (RuntimeException re) {
             re.printStackTrace();
         }
         return new ArrayList<>();
@@ -37,11 +46,23 @@ public class FeedServiceImpl implements FeedService{
 
     @Override
     public void addLike(Long id) {
-        try{
-            FeedEntity feedEntity = feedRepository.findById(id).get();
-            feedEntity.setLikes(feedEntity.getLikes()+1);
-            feedRepository.save(feedEntity);
-        }catch (RuntimeException re){
+        try {
+
+
+            if(!likeRepository.findByFeedIdAndUserIdAndType(id, CommonUtil.getLoggedInUserId(), Constants.FEED).isPresent()){
+
+                FeedEntity feedEntity = feedRepository.findById(id).get();
+                feedEntity.setLikes(feedEntity.getLikes() == null ? 1: feedEntity.getLikes()+ 1);
+                feedRepository.save(feedEntity);
+
+                LikeEntity like = new LikeEntity();
+                like.setFeedId(feedEntity.getFeedId());
+                like.setUserId(CommonUtil.getLoggedInUserId());
+                like.setType(Constants.FEED);
+                likeRepository.save(like);
+            }
+
+        } catch (RuntimeException re) {
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while adding like");
         }
 
@@ -49,10 +70,13 @@ public class FeedServiceImpl implements FeedService{
 
     @Override
     public FeedDto getFeedById(Long id) {
-        try{
+        try {
             FeedEntity feedEntity = feedRepository.findById(id).get();
-            return ObjectMapperUtils.map(feedEntity, FeedDto.class);
-        }catch (RuntimeException re){
+            FeedDto feedDto = ObjectMapperUtils.map(feedEntity, FeedDto.class);
+            feedDto.setLiked(likeRepository.findByFeedIdAndUserIdAndType(feedEntity.getFeedId(), CommonUtil.getLoggedInUserId(), Constants.FEED).isPresent());
+            return feedDto;
+
+        } catch (RuntimeException re) {
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Feed not found");
         }
     }

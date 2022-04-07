@@ -12,7 +12,7 @@ import java.util.Calendar;
 @Getter
 @Setter
 public class FeedDto {
-    private Long id;
+    private Long feedId;
     private String title;
     private String link;
     private Calendar date;
@@ -20,6 +20,6 @@ public class FeedDto {
     private Integer likes;
     private String keywords;
     private String imageUrl;
-
+    private boolean liked;
 
 }

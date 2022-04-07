@@ -2,11 +2,15 @@ package com.dooffle.KickOn.services;
 
 import com.dooffle.KickOn.data.AmenitiesEntity;
 import com.dooffle.KickOn.data.EventEntity;
+import com.dooffle.KickOn.data.LikeEntity;
 import com.dooffle.KickOn.dto.EventDto;
 import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.repository.AmenitiesRepository;
 import com.dooffle.KickOn.repository.EventRepository;
+import com.dooffle.KickOn.repository.LikeRepository;
 import com.dooffle.KickOn.rsql.CustomRsqlVisitor;
+import com.dooffle.KickOn.utils.CommonUtil;
+import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
@@ -22,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Transactional
 public class EventServiceImpl implements EventService{
 
     @Autowired
@@ -32,6 +37,9 @@ public class EventServiceImpl implements EventService{
 
     @Autowired
     AmenitiesRepository amenitiesRepository;
+
+    @Autowired
+    LikeRepository likeRepository;
 
     @Override
     @Transactional
@@ -82,11 +90,34 @@ public class EventServiceImpl implements EventService{
             EventEntity eventEntity = eventRepository.findById(eventId).get();
             EventDto responseDto = ObjectMapperUtils.map(eventEntity, EventDto.class);
             responseDto.setBanners(fileService.getBannersByEventId(eventEntity.getEventId()));
+            responseDto.setLiked(likeRepository.findByFeedIdAndUserIdAndType(eventEntity.getEventId(), CommonUtil.getLoggedInUserId(), Constants.EVENT).isPresent());
             return responseDto;
         }catch (RuntimeException e) {
             throw new CustomAppException(HttpStatus.NOT_FOUND, "Event with Id " + eventId + " not found!");
         }
 
+    }
+
+    @Override
+    public void addLike(Long id) {
+        try {
+
+
+            if(!likeRepository.findByFeedIdAndUserIdAndType(id, CommonUtil.getLoggedInUserId(), Constants.EVENT).isPresent()){
+                EventEntity eventEntity = eventRepository.findById(id).get();
+                eventEntity.setLikes(eventEntity.getLikes() == null ? 1 : eventEntity.getLikes()+ 1);
+                eventRepository.save(eventEntity);
+
+                LikeEntity like = new LikeEntity();
+                like.setFeedId(eventEntity.getEventId());
+                like.setUserId(CommonUtil.getLoggedInUserId());
+                like.setType(Constants.EVENT);
+                likeRepository.save(like);
+            }
+
+        } catch (RuntimeException re) {
+            throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while adding like");
+        }
     }
 
 

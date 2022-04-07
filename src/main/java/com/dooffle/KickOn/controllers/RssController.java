@@ -66,7 +66,7 @@ public class RssController {
                 }
                 feedDto.setDate(cal);
                 feedDto.setTitle(((JSONObject)x).getString("title"));
-                feedDto.setLink(((JSONObject)x).getString("link"));
+                feedDto.setLink(((JSONObject)x).getString("link")+"/partners/45111");
                 feedDto.setImageUrl(((JSONObject)x).getJSONObject("media:thumbnail").getString("url"));
                 feedDtos.add(feedDto);
             });

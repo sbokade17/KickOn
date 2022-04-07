@@ -33,6 +33,12 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventResponse);
     }
 
+    @PostMapping(value = "/like/{id}")
+    public ResponseEntity<StatusDto> addLike(@PathVariable("id") Long id){
+        eventService.addLike(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new StatusDto(Constants.SUCCESS));
+    }
+
     @GetMapping(value = "/all")
     public ResponseEntity<List<EventDto>> getAllEvents(@RequestParam(value = "search", required = false) String search){
 

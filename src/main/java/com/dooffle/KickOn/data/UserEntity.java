@@ -58,8 +58,6 @@ public class UserEntity implements Serializable {
     @Column
     private Calendar createdOn;
 
-
-
     @ManyToMany(fetch = FetchType.EAGER,
             cascade = {
                     CascadeType.PERSIST,
@@ -68,7 +66,6 @@ public class UserEntity implements Serializable {
     @JoinTable(name = "USER_ROLES",
             joinColumns = { @JoinColumn(name = "USER_ID")},
             inverseJoinColumns = { @JoinColumn(name = "ROLE_ID")})
-    private Set<RoleEntity> roles= new HashSet<>();
-
-
+    private Set<RoleEntity> roles = new HashSet<>();
+;
 }

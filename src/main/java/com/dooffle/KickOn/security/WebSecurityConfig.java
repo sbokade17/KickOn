@@ -67,7 +67,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, environment.getProperty("usersOtp.path")).permitAll()
                 .antMatchers(HttpMethod.GET, environment.getProperty("feedsById.path")).permitAll()
                 .antMatchers(HttpMethod.GET, environment.getProperty("feeds.path")).permitAll()
-                .antMatchers(HttpMethod.POST, environment.getProperty("feedsLike.path")).permitAll()
+             //   .antMatchers(HttpMethod.POST, environment.getProperty("feedsLike.path")).permitAll()
                 .antMatchers(HttpMethod.POST, environment.getProperty("usersValidateOtp.path")).permitAll()
                 .anyRequest().authenticated()
                 .and().addFilter(getAuthenticationFilter())

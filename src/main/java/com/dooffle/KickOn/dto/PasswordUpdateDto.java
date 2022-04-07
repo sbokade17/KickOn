@@ -17,7 +17,6 @@ public class PasswordUpdateDto implements Serializable {
 
     private String userId;
     private String password;
-    private String oldPassword;
 
 
 }

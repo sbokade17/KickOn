@@ -94,10 +94,9 @@ public class EmailService {
         Map map = new HashMap();
         map.put("name",firstName);
         map.put("otp",otp);
-        try {
-            sendTemplateMail(email, "OTP to reset password", "reset_password.ftlh", map);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+
+        sendMail(email, "OTP", "Use OTP:"+otp);
+
+        // sendTemplateMail(email, "OTP to reset password", "reset_password.ftlh", map);
     }
 }

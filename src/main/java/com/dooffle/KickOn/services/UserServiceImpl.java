@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
             calendar.add(Calendar.MINUTE, 5);
             otpEntity.setValidity(calendar); //5 minutes validity
             otpRepository.save(otpEntity);
-         //   emailService.sendResetMail(userDto.getEmail(),otp, userDto.getFirstName());
+            emailService.sendResetMail(userDto.getEmail(),otp, userDto.getFirstName());
 
         }else{
             throw new CustomAppException(HttpStatus.BAD_REQUEST, "OTP already sent to User.");
@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
         calendar.add(Calendar.MINUTE, 5);
         otpEntity.setValidity(calendar); //5 minutes validity
         otpRepository.save(otpEntity);
-        final String uri = "http://smslogin.pcexpert.in/api/mt/SendSMS?DCS=0&flashsms=0&user=kickon&password=846342&senderid=KICKON&channel=Trans&number=8421145676&text=Welcome User, Use "+otp+" to kick start the World of Football. Please do not share this OTP. Team KickOn Football&route=67";
+        final String uri = "http://smslogin.pcexpert.in/api/mt/SendSMS?DCS=0&flashsms=0&user=kickon&password=846342&senderid=KICKON&channel=Trans&number="+userInput+"&text=Welcome User, Use "+otp+" to kick start the World of Football. Please do not share this OTP. Team KickOn Football&route=67";
 
         RestTemplate restTemplate = new RestTemplate();
         Map result = restTemplate.getForObject(uri, Map.class);
@@ -190,12 +190,12 @@ public class UserServiceImpl implements UserService {
         try{
             UserEntity user = userRepository.findByUserId(passwordUpdateDto.getUserId());
 
-            if(passwordUpdateDto.getOldPassword()!=null){
-                if(!bCryptPasswordEncoder.matches(passwordUpdateDto.getOldPassword(),user.getEncryptedPassword())){
-                    throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Old password does not match!");
-
-                }
-            }
+//            if(passwordUpdateDto.getOldPassword()!=null){
+//                if(!bCryptPasswordEncoder.matches(passwordUpdateDto.getOldPassword(),user.getEncryptedPassword())){
+//                    throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Old password does not match!");
+//
+//                }
+//            }
             user.setEncryptedPassword(bCryptPasswordEncoder.encode(passwordUpdateDto.getPassword()));
             user = userRepository.save(user);
             return ObjectMapperUtils.map(user, UserDto.class);

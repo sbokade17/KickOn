@@ -6,6 +6,7 @@ import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
+import org.hibernate.type.CalendarType;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,12 +36,32 @@ public class SearchServiceImpl implements SearchService{
     public List<SearchDto> findInAll(String search) {
 
         try {
-            String queryString= "select name, type, event_id as id from event_table where lower(name) like lower('%"+search+"%')\n" +
-                    "union\n" +
-                    "select name, type, event_id as id from event_table where lower(description) like lower('%"+search+"%')\n" +
-                    "union\n" +
-                    "select title as name, 'Feed' as type, id from feed_table where lower(title) like lower('%"+search+"%')\n" ;
-
+            String queryString= "SELECT NAME,\n" +
+                    "\tTYPE,\n" +
+                    "\tEVENT_ID AS ID,\n" +
+                    "\n" +
+                    "\t\tCAST( (SELECT MIN(ID)\n" +
+                    "\t\tFROM FILE_TABLE\n" +
+                    "\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) as CHARACTER VARYING(255) ) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE\n" +
+                    "WHERE LOWER(NAME) like LOWER('%"+search+"%')\n" +
+                    "UNION\n" +
+                    "SELECT NAME,\n" +
+                    "\tTYPE,\n" +
+                    "\tEVENT_ID AS ID,\n" +
+                    "\n" +
+                    "\t\tCAST( (SELECT MIN(ID)\n" +
+                    "\t\tFROM FILE_TABLE\n" +
+                    "\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) as CHARACTER VARYING(255) ) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE\n" +
+                    "WHERE LOWER(DESCRIPTION) like LOWER('%"+search+"%')\n" +
+                    "UNION\n" +
+                    "SELECT TITLE AS NAME,\n" +
+                    "\t'Feed' AS TYPE,\n" +
+                    "\tFEED_ID AS ID,\n" +
+                    "\tIMAGE_URL AS IMAGE, DATE\n" +
+                    "FROM FEED_TABLE\n" +
+                    "WHERE LOWER(TITLE) like LOWER('%"+search+"%')" ;
             Query query = entityManager.createNativeQuery(
                     queryString
             );
@@ -48,6 +69,8 @@ public class SearchServiceImpl implements SearchService{
                     .addScalar("name", StringType.INSTANCE)
                     .addScalar("type", StringType.INSTANCE)
                     .addScalar("id", StringType.INSTANCE)
+                    .addScalar("image", StringType.INSTANCE)
+                    .addScalar("date", CalendarType.INSTANCE)
                     .setResultTransformer(Transformers.aliasToBean(SearchDto.class));
 
             return query.getResultList();

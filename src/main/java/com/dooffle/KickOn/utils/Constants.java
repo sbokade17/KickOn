@@ -21,4 +21,5 @@ public class Constants {
     public static final String TOURNAMENT = "tournament";
     public static final String TRIAL = "trial";
     public static final String FEED = "Feed";
+    public static final String EVENT = "Event";
 }

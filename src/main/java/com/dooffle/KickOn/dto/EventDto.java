@@ -28,4 +28,6 @@ public class EventDto {
     private String capacity;
     private String type;
     private String subType;
+    private Integer likes;
+    private boolean liked;
 }
