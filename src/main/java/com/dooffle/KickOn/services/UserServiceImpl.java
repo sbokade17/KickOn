@@ -188,7 +188,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto resetPassword(PasswordUpdateDto passwordUpdateDto) {
         try{
-            UserEntity user = userRepository.findByUserId(passwordUpdateDto.getUserId());
+            UserEntity user = userRepository.findByEmailOrContact(passwordUpdateDto.getEmail(),passwordUpdateDto.getEmail());
 
 //            if(passwordUpdateDto.getOldPassword()!=null){
 //                if(!bCryptPasswordEncoder.matches(passwordUpdateDto.getOldPassword(),user.getEncryptedPassword())){
@@ -266,7 +266,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public StatusDto updatePassword(PasswordUpdateDto passwordUpdateDto) {
-        passwordUpdateDto.setUserId(CommonUtil.getLoggedInUserId());
+        UserEntity userEntity = userRepository.findByUserId(CommonUtil.getLoggedInUserId());
+        passwordUpdateDto.setEmail(userEntity.getEmail());
         resetPassword(passwordUpdateDto);
         return new StatusDto(Constants.SUCCESS);
     }
@@ -305,7 +306,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByEmail(username);
+        UserEntity user = userRepository.findByEmailOrContact(username, username);
         if(user == null) throw new UsernameNotFoundException(username);
 
         return new User(user.getEmail(),user.getEncryptedPassword(), true, true, true, true, new ArrayList<>());

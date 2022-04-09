@@ -113,18 +113,13 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new StatusDto(Constants.SUCCESS));
     }
 
-    @PostMapping(value = "/validateOtp/reset")
+    @PostMapping(value = "/validateOtp")
     public ResponseEntity<CreateUserResponseModel> validateOtpVerifyAccount(@Valid @RequestBody ValidateOtpRequestModel validateOtpRequestModel) {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         OtpDto otpDto = modelMapper.map(validateOtpRequestModel, OtpDto.class);
         UserDto userDto = userService.validateOtp(otpDto);
-        if(userDto!=null){
-            PasswordUpdateDto passwordUpdateDto= new PasswordUpdateDto();
-            passwordUpdateDto.setUserId(userDto.getUserId());
-            passwordUpdateDto.setPassword(validateOtpRequestModel.getPassword());
-            userService.resetPassword(passwordUpdateDto);
-        }else {
+        if(userDto==null){
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Unable to validate OTP!");
         }
 
@@ -134,7 +129,7 @@ public class UsersController {
     @PostMapping(value = "/resetPassword")
     public ResponseEntity<StatusDto> resetPassword(@Valid @RequestBody PasswordUpdateDto passwordUpdateDto) {
 
-        passwordUpdateDto.setUserId(CommonUtil.getLoggedInUserId());
+
         UserDto user = userService.resetPassword(passwordUpdateDto);
         if (user != null) {
             return ResponseEntity.status(HttpStatus.OK).body(new StatusDto("Password reset successful"));

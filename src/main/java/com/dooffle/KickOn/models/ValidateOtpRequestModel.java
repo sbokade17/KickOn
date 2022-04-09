@@ -23,7 +23,5 @@ public class ValidateOtpRequestModel {
     @NotNull(message = "OTP cannot be null")
     private String otp;
 
-    @NotNull(message = "Password cannot be null")
-    private String password;
 
 }

@@ -12,4 +12,6 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     UserEntity findByEmail(String email);
 
     List<UserEntity> findByIsVerifiedAndIsKycDone(boolean isVerified, boolean isKycDone);
+
+    UserEntity findByEmailOrContact(String email, String contact);
 }

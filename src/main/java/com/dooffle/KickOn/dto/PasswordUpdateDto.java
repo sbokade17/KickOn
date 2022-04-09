@@ -15,7 +15,7 @@ public class PasswordUpdateDto implements Serializable {
 
     private static final long serialVersionUID = 3728736151828955521L;
 
-    private String userId;
+    private String email;
     private String password;
 
 
