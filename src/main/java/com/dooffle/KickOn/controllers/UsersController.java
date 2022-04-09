@@ -138,4 +138,5 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new StatusDto("Error while fetching user details!"));
     }
 
+
 }

@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendOtpOnMail(String userInput) {
-        UserDto userDto=getUserDetailsByEmail(userInput);
+        //UserDto userDto=getUserDetailsByEmail(userInput);
         OtpEntity otpEntity=otpRepository.findByEmail(userInput);
 
         if(null!=otpEntity && otpEntity.getValidity().before(Calendar.getInstance())){
@@ -121,12 +121,12 @@ public class UserServiceImpl implements UserService {
             otpEntity= new OtpEntity();
             otpEntity.setOtp(otp);
             otpEntity.setMobile("NA");
-            otpEntity.setEmail(userDto.getEmail());
+            otpEntity.setEmail(userInput);
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.MINUTE, 5);
             otpEntity.setValidity(calendar); //5 minutes validity
             otpRepository.save(otpEntity);
-            emailService.sendResetMail(userDto.getEmail(),otp, userDto.getFirstName());
+            emailService.sendResetMail(userInput,otp, "User");
 
         }else{
             throw new CustomAppException(HttpStatus.BAD_REQUEST, "OTP already sent to User.");
