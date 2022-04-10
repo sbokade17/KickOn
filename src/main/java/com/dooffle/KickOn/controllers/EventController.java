@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/event")
@@ -69,6 +70,14 @@ public class EventController {
         }
 
     }
+
+    @PatchMapping(value= "/{eventId}")
+    public ResponseEntity<EventDto> patchPet(@PathVariable("eventId") Long eventId, @RequestBody Map<String,Object> patchObject){
+
+        EventDto eventDto=eventService.patchEvent(eventId, patchObject);
+        return ResponseEntity.status(HttpStatus.OK).body(eventDto);
+    }
+
 
 
 }

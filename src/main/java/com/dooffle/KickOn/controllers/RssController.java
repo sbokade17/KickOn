@@ -44,7 +44,7 @@ public class RssController {
     }
 
     @GetMapping
-    public List<FeedDto> getRssFeed() throws IOException {
+    public List<FeedDto> getRssFeed(@RequestParam(value = "category", required = false) String category) throws IOException {
         List<FeedDto> feedDtos = new ArrayList<>();
 
         try {
@@ -70,7 +70,7 @@ public class RssController {
                 feedDto.setImageUrl(((JSONObject)x).getJSONObject("media:thumbnail").getString("url"));
                 feedDtos.add(feedDto);
             });
-            return feedService.addAndGetFeeds(feedDtos);
+            return feedService.addAndGetFeeds(feedDtos, category);
         }  catch (Exception e) {
             e.printStackTrace();
         }

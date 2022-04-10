@@ -3,6 +3,7 @@ package com.dooffle.KickOn.services;
 import com.dooffle.KickOn.dto.EventDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EventService {
     EventDto createEvent(EventDto eventDto);
@@ -14,4 +15,6 @@ public interface EventService {
     EventDto getEventById(Long eventId);
 
     void addLike(Long id);
+
+    EventDto patchEvent(Long eventId, Map<String, Object> patchObject);
 }

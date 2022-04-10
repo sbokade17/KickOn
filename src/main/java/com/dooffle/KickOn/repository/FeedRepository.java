@@ -12,4 +12,6 @@ public interface FeedRepository extends JpaRepository<FeedEntity, Long> {
     List<FeedEntity> findAllByLinkInOrderByDateDesc(Set<String> urlSet);
 
     List<FeedEntity> findTop50ByLinkInOrderByDateDesc(Set<String> urlSet);
+
+    List<FeedEntity> findTop50ByLinkInAndCategoryLikeOrderByDateDesc(Set<String> urlSet, String category);
 }

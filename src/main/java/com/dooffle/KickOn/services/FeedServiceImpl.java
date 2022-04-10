@@ -2,9 +2,7 @@ package com.dooffle.KickOn.services;
 
 import com.dooffle.KickOn.data.FeedEntity;
 import com.dooffle.KickOn.data.LikeEntity;
-import com.dooffle.KickOn.data.UserEntity;
 import com.dooffle.KickOn.dto.FeedDto;
-import com.dooffle.KickOn.dto.UserDto;
 import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.repository.FeedRepository;
 import com.dooffle.KickOn.repository.LikeRepository;
@@ -30,14 +28,21 @@ public class FeedServiceImpl implements FeedService {
     LikeRepository likeRepository;
 
     @Override
-    public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos) {
+    public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String category) {
         try {
             Set<String> urlSet = feedDtos.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedEntity> feeds = feedRepository.findAllByLinkIn(urlSet);
             Set<String> existingFeeds = feeds.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedDto> feedsToBeAddedToDB = feedDtos.stream().filter(x -> !existingFeeds.contains(x.getLink())).collect(Collectors.toList());
             feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
-            return ObjectMapperUtils.mapAll(feedRepository.findTop50ByLinkInOrderByDateDesc(urlSet), FeedDto.class);
+            List<FeedEntity> results = new ArrayList<>();
+            if(category==null){
+                results = feedRepository.findTop50ByLinkInOrderByDateDesc(urlSet);
+            }else {
+                results = feedRepository.findTop50ByLinkInAndCategoryLikeOrderByDateDesc(urlSet,category);
+            }
+
+            return ObjectMapperUtils.mapAll(results, FeedDto.class);
         } catch (RuntimeException re) {
             re.printStackTrace();
         }

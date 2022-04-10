@@ -15,15 +15,14 @@ import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Transactional
@@ -117,6 +116,24 @@ public class EventServiceImpl implements EventService{
 
         } catch (RuntimeException re) {
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while adding like");
+        }
+    }
+
+    @Override
+    public EventDto patchEvent(Long eventId, Map<String, Object> patchObject) {
+        try {
+            EventEntity eventEntity = eventRepository.findById(eventId).get();
+            eventEntity = ObjectMapperUtils.map(patchObject, eventEntity);
+            EventDto eventDto = ObjectMapperUtils.map(eventRepository.save(eventEntity), EventDto.class);
+            eventDto = ObjectMapperUtils.map(patchObject, eventDto);
+            if(eventDto.getBannerIds().size()>0){
+                fileService.updateEventId(eventDto.getBannerIds(), eventEntity.getEventId());
+            }
+            EventDto responseDto = ObjectMapperUtils.map(eventEntity, EventDto.class);
+            responseDto.setBanners(fileService.getBannersByEventId(eventDto.getEventId()));
+            return responseDto;
+        } catch (EmptyResultDataAccessException e) {
+            throw new CustomAppException(HttpStatus.NOT_FOUND, "Event with id " + eventId + " not found.");
         }
     }
 
