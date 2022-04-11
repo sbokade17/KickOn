@@ -40,6 +40,18 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(new StatusDto(Constants.SUCCESS));
     }
 
+    @PostMapping(value = "/share/{id}")
+    public ResponseEntity<StatusDto> addShare(@PathVariable("id") Long id){
+        eventService.addShare(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new StatusDto(Constants.SUCCESS));
+    }
+
+    @PostMapping(value = "/dislike/{id}")
+    public ResponseEntity<StatusDto> removeLike(@PathVariable("id") Long id){
+        eventService.removeLike(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new StatusDto(Constants.SUCCESS));
+    }
+
     @GetMapping(value = "/all")
     public ResponseEntity<List<EventDto>> getAllEvents(@RequestParam(value = "search", required = false) String search){
 

@@ -10,4 +10,6 @@ public interface FeedService {
     void addLike(Long id);
 
     FeedDto getFeedById(Long id);
+
+    void removeLike(Long id);
 }

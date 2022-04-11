@@ -19,7 +19,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -126,7 +125,7 @@ public class EventServiceImpl implements EventService{
             eventEntity = ObjectMapperUtils.map(patchObject, eventEntity);
             EventDto eventDto = ObjectMapperUtils.map(eventRepository.save(eventEntity), EventDto.class);
             eventDto = ObjectMapperUtils.map(patchObject, eventDto);
-            if(eventDto.getBannerIds().size()>0){
+            if(eventDto.getBannerIds()!=null && eventDto.getBannerIds().size()>0){
                 fileService.updateEventId(eventDto.getBannerIds(), eventEntity.getEventId());
             }
             EventDto responseDto = ObjectMapperUtils.map(eventEntity, EventDto.class);
@@ -135,6 +134,28 @@ public class EventServiceImpl implements EventService{
         } catch (EmptyResultDataAccessException e) {
             throw new CustomAppException(HttpStatus.NOT_FOUND, "Event with id " + eventId + " not found.");
         }
+    }
+
+    @Override
+    public void removeLike(Long id) {
+        try {
+            Optional<LikeEntity> likeOpt = likeRepository.findByFeedIdAndUserIdAndType(id, CommonUtil.getLoggedInUserId(), Constants.EVENT);
+
+            if(likeOpt.isPresent()){
+                EventEntity eventEntity = eventRepository.findById(id).get();
+                eventEntity.setLikes(eventEntity.getLikes()- 1);
+                eventRepository.save(eventEntity);
+                likeRepository.delete(likeOpt.get());
+            }
+
+        } catch (RuntimeException re) {
+            throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while adding like");
+        }
+    }
+
+    @Override
+    public void addShare(Long id) {
+
     }
 
 

@@ -37,6 +37,12 @@ public class RssController {
         return ResponseEntity.status(HttpStatus.OK).body(new StatusDto(Constants.SUCCESS));
     }
 
+    @PostMapping(value = "/dislike/{id}")
+    public ResponseEntity<StatusDto> removeLike(@PathVariable("id") Long id){
+        feedService.removeLike(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new StatusDto(Constants.SUCCESS));
+    }
+
     @GetMapping(value = "/{id}")
     public ResponseEntity<FeedDto> getFeedById(@PathVariable("id") Long id){
         FeedDto feedDto = feedService.getFeedById(id);

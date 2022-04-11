@@ -17,4 +17,8 @@ public interface EventService {
     void addLike(Long id);
 
     EventDto patchEvent(Long eventId, Map<String, Object> patchObject);
+
+    void removeLike(Long id);
+
+    void addShare(Long id);
 }

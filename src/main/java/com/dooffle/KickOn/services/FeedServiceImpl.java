@@ -39,7 +39,7 @@ public class FeedServiceImpl implements FeedService {
             if(category==null){
                 results = feedRepository.findTop50ByLinkInOrderByDateDesc(urlSet);
             }else {
-                results = feedRepository.findTop50ByLinkInAndCategoryLikeOrderByDateDesc(urlSet,category);
+                results = feedRepository.findTop50ByLinkInAndKeywordsContainingOrderByDateDesc(urlSet,category);
             }
 
             return ObjectMapperUtils.mapAll(results, FeedDto.class);
@@ -83,6 +83,24 @@ public class FeedServiceImpl implements FeedService {
 
         } catch (RuntimeException re) {
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Feed not found");
+        }
+    }
+
+    @Override
+    public void removeLike(Long id) {
+        try {
+            Optional<LikeEntity> likeOp = likeRepository.findByFeedIdAndUserIdAndType(id, CommonUtil.getLoggedInUserId(), Constants.FEED);
+
+            if(likeOp.isPresent()){
+
+                FeedEntity feedEntity = feedRepository.findById(id).get();
+                feedEntity.setLikes(feedEntity.getLikes()- 1);
+                feedRepository.save(feedEntity);
+                likeRepository.delete(likeOp.get());
+            }
+
+        } catch (RuntimeException re) {
+            throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while removing like");
         }
     }
 }

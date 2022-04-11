@@ -9,9 +9,7 @@ import java.util.Set;
 public interface FeedRepository extends JpaRepository<FeedEntity, Long> {
     List<FeedEntity> findAllByLinkIn(Set<String> urlSet);
 
-    List<FeedEntity> findAllByLinkInOrderByDateDesc(Set<String> urlSet);
-
     List<FeedEntity> findTop50ByLinkInOrderByDateDesc(Set<String> urlSet);
 
-    List<FeedEntity> findTop50ByLinkInAndCategoryLikeOrderByDateDesc(Set<String> urlSet, String category);
+    List<FeedEntity> findTop50ByLinkInAndKeywordsContainingOrderByDateDesc(Set<String> urlSet, String category);
 }
