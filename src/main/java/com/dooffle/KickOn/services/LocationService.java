@@ -10,4 +10,6 @@ public interface LocationService {
     LocationDto addLocation(LocationDto location);
 
     void deleteById(Long locId);
+
+    LocationDto findById(Long locationId);
 }

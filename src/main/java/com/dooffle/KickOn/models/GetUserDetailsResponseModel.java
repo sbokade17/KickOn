@@ -22,5 +22,5 @@ public class GetUserDetailsResponseModel {
     private String contact;
     private String token;
     private String userType;
-
+    private String locationId;
 }

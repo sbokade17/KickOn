@@ -47,6 +47,9 @@ public class UserEntity implements Serializable {
     private long picId;
 
     @Column
+    private String locationId;
+
+    @Column
     private Boolean isKycDone = false;
 
     @Column

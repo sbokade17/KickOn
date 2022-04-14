@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 public class LocationServiceImpl implements LocationService{
@@ -22,7 +22,7 @@ public class LocationServiceImpl implements LocationService{
     @Override
     public Set<LocationDto> getLocations() {
         List<LocationEntity> locationEntities = locationRepository.findAll();
-        return new HashSet<>(ObjectMapperUtils.mapAll(locationEntities, LocationDto.class));
+        return new TreeSet<>(ObjectMapperUtils.mapAll(locationEntities, LocationDto.class));
     }
 
     @Override
@@ -38,6 +38,15 @@ public class LocationServiceImpl implements LocationService{
             locationRepository.deleteById(locId);
         } catch (RuntimeException e) {
             throw new CustomAppException(HttpStatus.NOT_FOUND, "Location with Id " + locId + " not found!");
+        }
+    }
+
+    @Override
+    public LocationDto findById(Long locationId) {
+        try {
+            return ObjectMapperUtils.map(locationRepository.findByLocId(locationId), LocationDto.class);
+        } catch (RuntimeException e) {
+            throw new CustomAppException(HttpStatus.NOT_FOUND, "Location with Id " + locationId + " not found!");
         }
     }
 }

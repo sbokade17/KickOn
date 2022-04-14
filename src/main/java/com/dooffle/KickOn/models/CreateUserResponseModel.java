@@ -16,5 +16,6 @@ public class CreateUserResponseModel {
     private String lastName;
     private String email;
     private String contact;
+    private String locationId;
 
 }

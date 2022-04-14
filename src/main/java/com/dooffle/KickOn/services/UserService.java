@@ -37,4 +37,6 @@ public interface UserService extends UserDetailsService {
     List<UserDto> getPendingVendors();
 
     void validateMobileOtp(String mobile, String otp);
+
+    LocationDto saveLocation(Long locationId);
 }

@@ -9,9 +9,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class LocationDto {
+public class LocationDto implements Comparable<LocationDto>{
     private Long locId;
     private Double latitude;
     private Double longitude;
     private String locName;
+
+    @Override
+    public int compareTo(LocationDto other) {
+        return String.CASE_INSENSITIVE_ORDER.compare(getLocName(), other.getLocName());
+    }
 }

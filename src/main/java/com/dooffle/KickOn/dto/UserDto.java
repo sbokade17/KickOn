@@ -31,5 +31,6 @@ public class UserDto implements Serializable {
     private Boolean isActive;
     private FileDto pic;
     private String contact;
+    private String locationId;
 
 }

@@ -4,4 +4,5 @@ import com.dooffle.KickOn.data.LocationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LocationRepository extends JpaRepository<LocationEntity, Long> {
+    LocationEntity findByLocId(Long locationId);
 }

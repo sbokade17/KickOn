@@ -1,10 +1,7 @@
 package com.dooffle.KickOn.controllers;
 
 
-import com.dooffle.KickOn.dto.OtpDto;
-import com.dooffle.KickOn.dto.PasswordUpdateDto;
-import com.dooffle.KickOn.dto.StatusDto;
-import com.dooffle.KickOn.dto.UserDto;
+import com.dooffle.KickOn.dto.*;
 import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.models.CreateUserDetailsModel;
 import com.dooffle.KickOn.models.CreateUserResponseModel;
@@ -51,6 +48,12 @@ public class UsersController {
 
         UserDto user = userService.getUserDetails(CommonUtil.getLoggedInUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ObjectMapperUtils.map(user, GetUserDetailsResponseModel.class));
+    }
+
+    @PostMapping(value = "location")
+    public ResponseEntity<LocationDto> addLocation(@RequestBody Long locationId){
+        LocationDto locationDto = userService.saveLocation(locationId);
+        return ResponseEntity.status(HttpStatus.OK).body(locationDto);
     }
 
 

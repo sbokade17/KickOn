@@ -27,11 +27,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.transaction.Transactional;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
 
     Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -54,6 +56,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     FileService fileService;
+
+    @Autowired
+    LocationService locationService;
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -302,6 +307,15 @@ public class UserServiceImpl implements UserService {
 
         }
 
+    }
+
+    @Override
+    public LocationDto saveLocation(Long locationId) {
+        LocationDto locationDto = locationService.findById(locationId);
+        UserEntity userEntity = userRepository.findByUserId(CommonUtil.getLoggedInUserId());
+        userEntity.setLocationId(locationId.toString());
+        userRepository.save(userEntity);
+        return locationDto;
     }
 
     @Override
