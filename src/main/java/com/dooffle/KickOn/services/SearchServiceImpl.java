@@ -60,7 +60,8 @@ public class SearchServiceImpl implements SearchService{
                     "\tLINK AS LINK,\n" +
                     "\tIMAGE_URL AS IMAGE, DATE\n" +
                     "FROM FEED_TABLE\n" +
-                    "WHERE LOWER(TITLE) like LOWER('%"+search+"%')\n" ;
+                    "WHERE LOWER(TITLE) like LOWER('%"+search+"%')\n" +
+                    " ORDER BY ID DESC" ;
 
             Query query = entityManager.createNativeQuery(
                     queryString

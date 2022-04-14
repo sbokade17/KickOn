@@ -34,5 +34,6 @@ public class FeedEntity {
     private String keywords;
     @Column(length = 1024)
     private String imageUrl;
+
     
 }

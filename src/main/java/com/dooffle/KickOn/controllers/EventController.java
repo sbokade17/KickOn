@@ -53,9 +53,11 @@ public class EventController {
     }
 
     @GetMapping(value = "/all")
-    public ResponseEntity<List<EventDto>> getAllEvents(@RequestParam(value = "search", required = false) String search){
+    public ResponseEntity<List<EventDto>> getAllEvents(@RequestParam(value = "search", required = false) String search,
+                                                       @RequestParam(value = "start", required = false,  defaultValue = "0") int start,
+                                                       @RequestParam(value = "end", required = false,  defaultValue = "50") int end){
 
-        List<EventDto> eventDtos = eventService.getAllEvents(search);
+        List<EventDto> eventDtos = eventService.getAllEvents(search,start,end);
         return ResponseEntity.status(HttpStatus.OK).body(eventDtos);
     }
 

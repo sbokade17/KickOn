@@ -16,6 +16,9 @@ import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -57,19 +60,22 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public List<EventDto> getAllEvents(String search) {
+    public List<EventDto> getAllEvents(String search, int start, int end) {
         List<EventEntity> eventEntities = new ArrayList<>();
+        Pageable sortedByEventId =
+                PageRequest.of(start, end, Sort.by("eventId").descending());
         if(search!=null){
             Node rootNode = new RSQLParser().parse(search);
             Specification<EventEntity> spec = rootNode.accept(new CustomRsqlVisitor<EventEntity>());
-            eventEntities = eventRepository.findAll(spec);
+            eventEntities = eventRepository.findAll(spec, sortedByEventId).toList();
         }else{
-            eventEntities = eventRepository.findAll();
+            eventEntities = eventRepository.findAll(sortedByEventId).toList();
         }
 
         List<EventDto> eventDtos = ObjectMapperUtils.mapAll(eventEntities, EventDto.class);
         eventDtos.forEach(x->{
             x.setBanners(fileService.getBannersByEventId(x.getEventId()));
+            x.setLiked(likeRepository.findByFeedIdAndUserIdAndType(x.getEventId(), CommonUtil.getLoggedInUserId(), Constants.EVENT).isPresent());
         });
         return eventDtos;
     }

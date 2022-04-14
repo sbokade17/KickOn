@@ -8,7 +8,7 @@ import java.util.Map;
 public interface EventService {
     EventDto createEvent(EventDto eventDto);
 
-    List<EventDto> getAllEvents(String search);
+    List<EventDto> getAllEvents(String search, int start, int end);
 
     void deleteById(Long eventId);
 

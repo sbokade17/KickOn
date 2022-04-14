@@ -10,6 +10,9 @@ import com.dooffle.KickOn.utils.CommonUtil;
 import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -28,21 +31,26 @@ public class FeedServiceImpl implements FeedService {
     LikeRepository likeRepository;
 
     @Override
-    public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String category) {
+    public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String category, int start, int end) {
         try {
             Set<String> urlSet = feedDtos.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedEntity> feeds = feedRepository.findAllByLinkIn(urlSet);
             Set<String> existingFeeds = feeds.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedDto> feedsToBeAddedToDB = feedDtos.stream().filter(x -> !existingFeeds.contains(x.getLink())).collect(Collectors.toList());
             feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
-            List<FeedEntity> results = new ArrayList<>();
+            List<FeedEntity> results;
+            Pageable sortedByDate =
+                    PageRequest.of(start, end, Sort.by("date").descending());
             if(category==null){
-                results = feedRepository.findTop50ByLinkInOrderByDateDesc(urlSet);
+                results = feedRepository.findByLinkIn(urlSet, sortedByDate);
             }else {
-                results = feedRepository.findTop50ByLinkInAndKeywordsContainingOrderByDateDesc(urlSet,category);
+                results = feedRepository.findByLinkInAndKeywordsContaining(urlSet,category, sortedByDate);
             }
-
-            return ObjectMapperUtils.mapAll(results, FeedDto.class);
+            List<FeedDto> resultsDto = ObjectMapperUtils.mapAll(results, FeedDto.class);
+            resultsDto.forEach(x->{
+                x.setLiked(likeRepository.findByFeedIdAndUserIdAndType(x.getFeedId(), CommonUtil.getLoggedInUserId(), Constants.FEED).isPresent());
+            });
+            return resultsDto;
         } catch (RuntimeException re) {
             re.printStackTrace();
         }

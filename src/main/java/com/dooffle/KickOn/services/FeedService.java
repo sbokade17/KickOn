@@ -5,7 +5,7 @@ import com.dooffle.KickOn.dto.FeedDto;
 import java.util.List;
 
 public interface FeedService {
-    List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String search);
+    List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String search, int start, int end);
 
     void addLike(Long id);
 
