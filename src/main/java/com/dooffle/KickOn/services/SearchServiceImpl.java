@@ -3,7 +3,6 @@ package com.dooffle.KickOn.services;
 import com.dooffle.KickOn.dto.SearchDto;
 import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.utils.Constants;
-import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.CalendarType;
@@ -15,10 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class SearchServiceImpl implements SearchService{
@@ -39,29 +35,33 @@ public class SearchServiceImpl implements SearchService{
             String queryString= "SELECT NAME,\n" +
                     "\tTYPE,\n" +
                     "\tEVENT_ID AS ID,\n" +
-                    "\n" +
-                    "\t\tCAST( (SELECT MIN(ID)\n" +
-                    "\t\tFROM FILE_TABLE\n" +
-                    "\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) as CHARACTER VARYING(255) ) AS IMAGE, DATE\n" +
+                    "\t'' AS LINK,\n" +
+                    "\tCAST(\n" +
+                    "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
+                    "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
                     "FROM EVENT_TABLE\n" +
                     "WHERE LOWER(NAME) like LOWER('%"+search+"%')\n" +
                     "UNION\n" +
                     "SELECT NAME,\n" +
                     "\tTYPE,\n" +
                     "\tEVENT_ID AS ID,\n" +
-                    "\n" +
-                    "\t\tCAST( (SELECT MIN(ID)\n" +
-                    "\t\tFROM FILE_TABLE\n" +
-                    "\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) as CHARACTER VARYING(255) ) AS IMAGE, DATE\n" +
+                    "    '' AS LINK,\n" +
+                    "\tCAST(\n" +
+                    "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
+                    "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
                     "FROM EVENT_TABLE\n" +
                     "WHERE LOWER(DESCRIPTION) like LOWER('%"+search+"%')\n" +
                     "UNION\n" +
                     "SELECT TITLE AS NAME,\n" +
                     "\t'Feed' AS TYPE,\n" +
                     "\tFEED_ID AS ID,\n" +
+                    "\tLINK AS LINK,\n" +
                     "\tIMAGE_URL AS IMAGE, DATE\n" +
                     "FROM FEED_TABLE\n" +
-                    "WHERE LOWER(TITLE) like LOWER('%"+search+"%')" ;
+                    "WHERE LOWER(TITLE) like LOWER('%"+search+"%')\n" ;
+
             Query query = entityManager.createNativeQuery(
                     queryString
             );
@@ -71,13 +71,14 @@ public class SearchServiceImpl implements SearchService{
                     .addScalar("id", StringType.INSTANCE)
                     .addScalar("image", StringType.INSTANCE)
                     .addScalar("date", CalendarType.INSTANCE)
+                    .addScalar("link", StringType.INSTANCE)
                     .setResultTransformer(Transformers.aliasToBean(SearchDto.class));
 
             return query.getResultList();
 
 
         } catch (RuntimeException e) {
-            throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while searching");
+            throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, e.getLocalizedMessage());
         }
     }
 

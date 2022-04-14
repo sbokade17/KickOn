@@ -43,6 +43,7 @@ public class EventServiceImpl implements EventService{
     @Transactional
     public EventDto createEvent(EventDto eventDto) {
         EventEntity eventEntity = ObjectMapperUtils.map(eventDto,EventEntity.class);
+        eventEntity.setCreatedBy(CommonUtil.getLoggedInUserId());
         eventEntity = eventRepository.save(eventEntity);
         Set<AmenitiesEntity> amenitiesEntities = new HashSet<>(amenitiesRepository.findAllById(eventDto.getAmenitiesIds()));
         eventEntity.setAmenities(amenitiesEntities);
@@ -76,7 +77,7 @@ public class EventServiceImpl implements EventService{
     @Override
     public void deleteById(Long eventId) {
         try {
-            eventRepository.deleteById(eventId);
+            eventRepository.deleteByEventIdAndCreatedBy(eventId, CommonUtil.getLoggedInUserId());
         } catch (RuntimeException e) {
             throw new CustomAppException(HttpStatus.NOT_FOUND, "Event with Id " + eventId + " not found!");
         }
@@ -121,7 +122,7 @@ public class EventServiceImpl implements EventService{
     @Override
     public EventDto patchEvent(Long eventId, Map<String, Object> patchObject) {
         try {
-            EventEntity eventEntity = eventRepository.findById(eventId).get();
+            EventEntity eventEntity = eventRepository.findByEventIdAndCreatedBy(eventId,CommonUtil.getLoggedInUserId()).get();
             eventEntity = ObjectMapperUtils.map(patchObject, eventEntity);
             EventDto eventDto = ObjectMapperUtils.map(eventRepository.save(eventEntity), EventDto.class);
             eventDto = ObjectMapperUtils.map(patchObject, eventDto);

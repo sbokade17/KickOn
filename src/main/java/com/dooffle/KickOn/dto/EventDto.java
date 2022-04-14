@@ -30,4 +30,5 @@ public class EventDto {
     private String subType;
     private Integer likes;
     private boolean liked;
+    private String createdBy;
 }
