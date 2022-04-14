@@ -55,7 +55,7 @@ public class UserEntity implements Serializable {
     @Column
     private Boolean isActive = false;
 
-    @Column
+    @Column(length = 20, unique = true)
     private String contact;
 
     @Column

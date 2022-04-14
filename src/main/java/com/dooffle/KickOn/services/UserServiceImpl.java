@@ -92,7 +92,9 @@ public class UserServiceImpl implements UserService {
             if(psqlException.getMostSpecificCause().getMessage().contains("(email)=(")){
                 throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Email already exist!");
             }
-
+            if(psqlException.getMostSpecificCause().getMessage().contains("(contact)=(")){
+                throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Contact already exist!");
+            }
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, psqlException.getMostSpecificCause().getMessage());
 
         }
@@ -101,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserDetailsByEmail(String email) {
-        UserEntity user = userRepository.findByEmail(email);
+        UserEntity user = userRepository.findByEmailOrContact(email,email);
         if(user == null) throw new UsernameNotFoundException(email);
 
         ModelMapper modelMapper=new ModelMapper();
@@ -266,6 +268,16 @@ public class UserServiceImpl implements UserService {
             user = ObjectMapperUtils.map(patchObject, user);
             userRepository.save(user);
             return ObjectMapperUtils.map(user, UserDto.class);
+        } catch (DataIntegrityViolationException psqlException ) {
+
+            if(psqlException.getMostSpecificCause().getMessage().contains("(email)=(")){
+                throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Email already exist!");
+            }
+            if(psqlException.getMostSpecificCause().getMessage().contains("(contact)=(")){
+                throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Contact already exist!");
+            }
+            throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, psqlException.getMostSpecificCause().getMessage());
+
         }catch (RuntimeException re){
             throw new CustomAppException(HttpStatus.BAD_REQUEST, "Error while saving user");
         }
@@ -326,7 +338,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findByEmailOrContact(username, username);
         if(user == null) throw new UsernameNotFoundException(username);
 
-        return new User(user.getEmail(),user.getEncryptedPassword(), true, true, true, true, new ArrayList<>());
+        return new User(user.getEmail()!=null?user.getEmail():user.getContact(),user.getEncryptedPassword(), true, true, true, true, new ArrayList<>());
     }
 
 
