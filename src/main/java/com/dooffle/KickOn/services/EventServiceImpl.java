@@ -48,8 +48,10 @@ public class EventServiceImpl implements EventService{
         EventEntity eventEntity = ObjectMapperUtils.map(eventDto,EventEntity.class);
         eventEntity.setCreatedBy(CommonUtil.getLoggedInUserId());
         eventEntity = eventRepository.save(eventEntity);
-        Set<AmenitiesEntity> amenitiesEntities = new HashSet<>(amenitiesRepository.findAllById(eventDto.getAmenitiesIds()));
-        eventEntity.setAmenities(amenitiesEntities);
+        if(eventDto.getAmenitiesIds()!=null){
+            Set<AmenitiesEntity> amenitiesEntities = new HashSet<>(amenitiesRepository.findAllById(eventDto.getAmenitiesIds()));
+            eventEntity.setAmenities(amenitiesEntities);
+        }
         eventEntity = eventRepository.save(eventEntity);
         if(eventDto.getBannerIds().size()>0){
             fileService.updateEventId(eventDto.getBannerIds(), eventEntity.getEventId());

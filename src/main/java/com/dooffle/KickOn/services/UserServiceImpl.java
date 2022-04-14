@@ -33,7 +33,6 @@ import java.util.*;
 
 
 @Service
-@Transactional
 public class UserServiceImpl implements UserService {
 
     Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -88,7 +87,7 @@ public class UserServiceImpl implements UserService {
             if (ex.getMostSpecificCause() instanceof SQLIntegrityConstraintViolationException) {
                 throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMostSpecificCause().getMessage());
             }
-        } catch (DataIntegrityViolationException psqlException) {
+        } catch (DataIntegrityViolationException psqlException ) {
 
             if(psqlException.getMostSpecificCause().getMessage().contains("(email)=(")){
                 throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Email already exist!");
@@ -112,6 +111,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void sendOtpOnMail(String userInput) {
         //UserDto userDto=getUserDetailsByEmail(userInput);
         OtpEntity otpEntity=otpRepository.findByEmail(userInput);
@@ -142,6 +142,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void sendOtpOnMobile(String userInput) throws NoSuchMethodException {
 
 
@@ -168,6 +169,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto validateOtp(OtpDto otpDto) {
         UserDto userDto = null;
         OtpEntity otpEntity= null;
@@ -310,6 +312,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public LocationDto saveLocation(Long locationId) {
         LocationDto locationDto = locationService.findById(locationId);
         UserEntity userEntity = userRepository.findByUserId(CommonUtil.getLoggedInUserId());
