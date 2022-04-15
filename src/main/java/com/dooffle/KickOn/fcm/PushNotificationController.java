@@ -23,6 +23,12 @@ public class PushNotificationController {
         return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.OK.value(), "Notification has been sent."), HttpStatus.OK);
     }
 
+    @PostMapping("/notification/topic")
+    public ResponseEntity sendTopicNotification(@RequestBody PushNotificationRequest request) {
+        pushNotificationService.sendPushNotificationToToken(request);
+        return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.OK.value(), "Notification has been sent."), HttpStatus.OK);
+    }
+
     @GetMapping("/notification/chat/{userId}")
     private ResponseEntity<StatusDto> sendNotification(@PathVariable("userId") String userId){
         pushNotificationService.sendNotificationTo(userId);

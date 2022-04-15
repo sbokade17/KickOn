@@ -6,6 +6,8 @@ import com.dooffle.KickOn.data.RoleEntity;
 import com.dooffle.KickOn.data.UserEntity;
 import com.dooffle.KickOn.dto.*;
 import com.dooffle.KickOn.exception.CustomAppException;
+import com.dooffle.KickOn.fcm.service.NotificationService;
+import com.dooffle.KickOn.fcm.service.PushNotificationService;
 import com.dooffle.KickOn.repository.OtpRepository;
 import com.dooffle.KickOn.repository.RoleRepository;
 import com.dooffle.KickOn.repository.UserRepository;
@@ -58,6 +60,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     LocationService locationService;
+
+    @Autowired
+    PushNotificationService notificationService;
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -330,6 +335,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByUserId(CommonUtil.getLoggedInUserId());
         userEntity.setLocationId(locationId.toString());
         userRepository.save(userEntity);
+        notificationService.subscribeToTopic(locationDto.getLocName());
         return locationDto;
     }
 

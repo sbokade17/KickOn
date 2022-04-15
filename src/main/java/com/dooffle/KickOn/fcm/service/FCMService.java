@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -24,6 +25,18 @@ public class FCMService {
         String jsonOutput = gson.toJson(message);
         String response = sendAndGetResponse(message);
       //  logger.info("Sent message to token. Device token: " + request.getToken() + ", " + response+ " msg "+jsonOutput);
+    }
+
+    public TopicManagementResponse subscribeToTopic(List<String> deviceIds, String topicName) throws FirebaseMessagingException {
+        TopicManagementResponse response = FirebaseMessaging.getInstance().subscribeToTopic(
+                deviceIds, topicName);
+        return response;
+    }
+
+    public TopicManagementResponse unsubscribeToTopic(List<String> deviceIds, String topicName) throws FirebaseMessagingException {
+        TopicManagementResponse response = FirebaseMessaging.getInstance().unsubscribeFromTopic(
+                deviceIds, topicName);
+        return response;
     }
     
     private String sendAndGetResponse(Message message) throws InterruptedException, ExecutionException {
