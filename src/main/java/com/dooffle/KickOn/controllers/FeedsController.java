@@ -1,5 +1,6 @@
 package com.dooffle.KickOn.controllers;
 
+import com.dooffle.KickOn.dto.CategoriesDto;
 import com.dooffle.KickOn.dto.FeedDto;
 import com.dooffle.KickOn.dto.StatusDto;
 import com.dooffle.KickOn.services.FeedService;
@@ -8,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +28,14 @@ import java.util.Locale;
 
 @RestController
 @RequestMapping("/feeds")
-public class RssController {
+public class FeedsController {
 
     @Autowired
     FeedService feedService;
+
+    @Value("${app.google.clientId}")
+    private String feedsUrl;
+
 
     @PostMapping(value = "/like/{id}")
     public ResponseEntity<StatusDto> addLike(@PathVariable("id") Long id){
@@ -49,14 +55,22 @@ public class RssController {
         return ResponseEntity.status(HttpStatus.OK).body(feedDto);
     }
 
+    @GetMapping(value = "/categories")
+    public ResponseEntity<List<CategoriesDto>> getCategories(){
+        List<CategoriesDto> allCategories = feedService.getAllCategories();
+        return ResponseEntity.status(HttpStatus.OK).body(allCategories);
+    }
+
     @GetMapping
-    public List<FeedDto> getRssFeed(@RequestParam(value = "category", required = false) String category,
+    public List<FeedDto> getRssFeed(@RequestParam(value = "category", required = false, defaultValue = "All") String category,
+                                    @RequestParam(value = "keyword", required = false) String keyword,
                                     @RequestParam(value = "start", required = false,  defaultValue = "0") int start,
                                     @RequestParam(value = "end", required = false,  defaultValue = "50") int end) throws IOException {
         List<FeedDto> feedDtos = new ArrayList<>();
 
         try {
-            String url = "https://content.voltax.io/feed/01fs2kwrxmxxw2";
+            String url = feedService.getFeedsUrl(category);
+                    //
             String xmlString = readUrlToString(url);
             JSONObject xmlJSONObj = XML.toJSONObject(xmlString);
             JSONArray postList = xmlJSONObj.getJSONObject("rss").getJSONObject("channel").getJSONArray("item");
@@ -78,7 +92,7 @@ public class RssController {
                 feedDto.setImageUrl(((JSONObject)x).getJSONObject("media:thumbnail").getString("url"));
                 feedDtos.add(feedDto);
             });
-            return feedService.addAndGetFeeds(feedDtos, category, start, end);
+            return feedService.addAndGetFeeds(feedDtos, keyword, start, end);
         }  catch (Exception e) {
             e.printStackTrace();
         }

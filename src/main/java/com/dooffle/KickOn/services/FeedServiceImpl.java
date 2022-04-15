@@ -1,9 +1,12 @@
 package com.dooffle.KickOn.services;
 
+import com.dooffle.KickOn.data.FeedCategoryEntity;
 import com.dooffle.KickOn.data.FeedEntity;
 import com.dooffle.KickOn.data.LikeEntity;
+import com.dooffle.KickOn.dto.CategoriesDto;
 import com.dooffle.KickOn.dto.FeedDto;
 import com.dooffle.KickOn.exception.CustomAppException;
+import com.dooffle.KickOn.repository.FeedCategoryRepository;
 import com.dooffle.KickOn.repository.FeedRepository;
 import com.dooffle.KickOn.repository.LikeRepository;
 import com.dooffle.KickOn.utils.CommonUtil;
@@ -30,8 +33,11 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     LikeRepository likeRepository;
 
+    @Autowired
+    FeedCategoryRepository feedCategoryRepository;
+
     @Override
-    public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String category, int start, int end) {
+    public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String keyword, int start, int end) {
         try {
             Set<String> urlSet = feedDtos.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedEntity> feeds = feedRepository.findAllByLinkIn(urlSet);
@@ -41,10 +47,10 @@ public class FeedServiceImpl implements FeedService {
             List<FeedEntity> results;
             Pageable sortedByDate =
                     PageRequest.of(start, end, Sort.by("date").descending());
-            if(category==null){
+            if(keyword==null){
                 results = feedRepository.findByLinkIn(urlSet, sortedByDate);
             }else {
-                results = feedRepository.findByLinkInAndKeywordsContaining(urlSet,category, sortedByDate);
+                results = feedRepository.findByLinkInAndKeywordsContaining(urlSet,keyword, sortedByDate);
             }
             List<FeedDto> resultsDto = ObjectMapperUtils.mapAll(results, FeedDto.class);
             resultsDto.forEach(x->{
@@ -110,5 +116,16 @@ public class FeedServiceImpl implements FeedService {
         } catch (RuntimeException re) {
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while removing like");
         }
+    }
+
+    @Override
+    public String getFeedsUrl(String category) {
+        FeedCategoryEntity feedCategoryEntity = feedCategoryRepository.findByCategoryName(category);
+        return feedCategoryEntity.getCategoryUrl();
+    }
+
+    @Override
+    public List<CategoriesDto> getAllCategories() {
+        return ObjectMapperUtils.mapAll(feedCategoryRepository.findAll(),CategoriesDto.class);
     }
 }

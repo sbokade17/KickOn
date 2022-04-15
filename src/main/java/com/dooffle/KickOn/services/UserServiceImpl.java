@@ -6,7 +6,6 @@ import com.dooffle.KickOn.data.RoleEntity;
 import com.dooffle.KickOn.data.UserEntity;
 import com.dooffle.KickOn.dto.*;
 import com.dooffle.KickOn.exception.CustomAppException;
-import com.dooffle.KickOn.fcm.service.NotificationService;
 import com.dooffle.KickOn.fcm.service.PushNotificationService;
 import com.dooffle.KickOn.repository.OtpRepository;
 import com.dooffle.KickOn.repository.RoleRepository;
@@ -14,8 +13,6 @@ import com.dooffle.KickOn.repository.UserRepository;
 import com.dooffle.KickOn.utils.CommonUtil;
 import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,11 +107,14 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserDetailsByEmail(String email) {
         UserEntity user = userRepository.findByEmailOrContact(email,email);
         if(user == null) throw new UsernameNotFoundException(email);
+        return ObjectMapperUtils.map(user,UserDto.class);
+    }
 
-        ModelMapper modelMapper=new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        UserDto userDto=modelMapper.map(user, UserDto.class);
-        return userDto;
+    @Override
+    public UserDto getUserDetailsByEmailWithoutException(String email) {
+        UserEntity user = userRepository.findByEmailOrContact(email,email);
+        if(user == null) return null;
+        return ObjectMapperUtils.map(user,UserDto.class);
     }
 
     @Override

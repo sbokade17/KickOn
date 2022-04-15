@@ -62,6 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().and().authorizeRequests()
                 .antMatchers(HttpMethod.POST, environment.getProperty("registerUrl.path")).permitAll()
                 .antMatchers(HttpMethod.POST, environment.getProperty("loginUrl.path")).permitAll()
+                .antMatchers(HttpMethod.POST, environment.getProperty("validateGoogle.path")).permitAll()
                 .antMatchers(HttpMethod.POST, environment.getProperty("refreshTokenUrl.path")).permitAll()
                 .antMatchers(HttpMethod.GET, environment.getProperty("mobileValidateOtp.path")).permitAll()
                 .antMatchers(HttpMethod.GET, environment.getProperty("usersOtp.path")).permitAll()

@@ -46,9 +46,7 @@ public  class JwtUtils {
                 .compact();
     }
 
-    public static String getUserNameFromJwtToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
-    }
+
 
     public static boolean validateJwtToken(String authToken) {
         try {
