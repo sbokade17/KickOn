@@ -27,7 +27,7 @@ public class EventEntity implements Serializable {
     @SequenceGenerator(name = "event_id_sequence", sequenceName = "event_id_sequence")
     private long eventId;
 
-    @Column
+    @Column(length = 1024)
     private String description;
     @Column
     private String name;

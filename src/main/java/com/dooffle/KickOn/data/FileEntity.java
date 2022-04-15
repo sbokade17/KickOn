@@ -27,7 +27,7 @@ public class FileEntity implements Serializable {
     @Column(name = "type")
     private String type;
 
-    @Column(name = "fileByte", length = 1000)
+    @Column(name = "fileByte", length = 5000)
     private byte[] fileByte;
 
     @Column
