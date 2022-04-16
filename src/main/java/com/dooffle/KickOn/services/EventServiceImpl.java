@@ -5,6 +5,7 @@ import com.dooffle.KickOn.data.EventEntity;
 import com.dooffle.KickOn.data.LikeEntity;
 import com.dooffle.KickOn.dto.EventDto;
 import com.dooffle.KickOn.exception.CustomAppException;
+import com.dooffle.KickOn.fcm.service.NotificationService;
 import com.dooffle.KickOn.repository.AmenitiesRepository;
 import com.dooffle.KickOn.repository.EventRepository;
 import com.dooffle.KickOn.repository.LikeRepository;
@@ -42,6 +43,9 @@ public class EventServiceImpl implements EventService{
     @Autowired
     LikeRepository likeRepository;
 
+    @Autowired
+    NotificationService notificationService;
+
     @Override
     @Transactional
     public EventDto createEvent(EventDto eventDto) {
@@ -58,6 +62,7 @@ public class EventServiceImpl implements EventService{
         }
         EventDto responseDto = ObjectMapperUtils.map(eventEntity, EventDto.class);
         responseDto.setBanners(fileService.getBannersByEventId(eventDto.getEventId()));
+        notificationService.sendNotificationToTopic(responseDto);
         return responseDto;
     }
 

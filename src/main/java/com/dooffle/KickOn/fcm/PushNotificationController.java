@@ -25,7 +25,7 @@ public class PushNotificationController {
 
     @PostMapping("/notification/topic")
     public ResponseEntity sendTopicNotification(@RequestBody PushNotificationRequest request) {
-        pushNotificationService.sendPushNotificationToToken(request);
+        pushNotificationService.sendPushNotificationToTopic(request);
         return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.OK.value(), "Notification has been sent."), HttpStatus.OK);
     }
 

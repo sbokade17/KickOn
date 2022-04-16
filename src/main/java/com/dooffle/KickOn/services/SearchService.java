@@ -8,5 +8,7 @@ import java.util.Map;
 public interface SearchService {
     List<SearchDto> findInAll(String search);
 
+    SearchDto getSingleSearch(String type, Long id);
+
     Object getResultDetail(String type, Long id);
 }

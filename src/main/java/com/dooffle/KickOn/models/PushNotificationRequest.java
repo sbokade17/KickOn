@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -16,5 +18,6 @@ public class PushNotificationRequest {
     private String token;
     private String image;
     private String userId;
+    private Map data;
 
 }

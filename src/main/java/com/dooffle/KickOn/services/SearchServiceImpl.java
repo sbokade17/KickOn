@@ -84,6 +84,54 @@ public class SearchServiceImpl implements SearchService{
     }
 
     @Override
+    public SearchDto getSingleSearch(String type, Long id) {
+        try {
+            String queryString= "SELECT NAME,\n" +
+                    "\tTYPE,\n" +
+                    "\tEVENT_ID AS ID,\n" +
+                    "\t'' AS LINK,\n" +
+                    "\tCAST(\n" +
+                    "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
+                    "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE\n" +
+                    "WHERE type = '"+type+"' AND EVENT_ID ="+id+
+                    " UNION\n" +
+                    "SELECT NAME,\n" +
+                    "\tTYPE,\n" +
+                    "\tEVENT_ID AS ID,\n" +
+                    "    '' AS LINK,\n" +
+                    "\tCAST(\n" +
+                    "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
+                    "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE\n" +
+                    "WHERE type = '"+type+"' AND EVENT_ID ="+id+
+
+                    " ORDER BY ID DESC" ;
+
+            Query query = entityManager.createNativeQuery(
+                    queryString
+            );
+            query.unwrap(SQLQuery.class)
+                    .addScalar("name", StringType.INSTANCE)
+                    .addScalar("type", StringType.INSTANCE)
+                    .addScalar("id", StringType.INSTANCE)
+                    .addScalar("image", StringType.INSTANCE)
+                    .addScalar("date", CalendarType.INSTANCE)
+                    .addScalar("link", StringType.INSTANCE)
+                    .setResultTransformer(Transformers.aliasToBean(SearchDto.class));
+
+            List<SearchDto> result = query.getResultList();
+            return result.get(0);
+
+
+        } catch (RuntimeException e) {
+            throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, e.getLocalizedMessage());
+        }
+    }
+
+    @Override
     public Object getResultDetail(String type, Long id) {
 
         Object result;

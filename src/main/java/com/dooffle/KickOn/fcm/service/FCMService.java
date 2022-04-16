@@ -74,4 +74,18 @@ public class FCMService {
                 .setApnsConfig(apnsConfig).setAndroidConfig(androidConfig).setNotification(
                         Notification.builder().setBody(request.getMessage()).setTitle(request.getTitle()).setImage(request.getImage()).build());
     }
+
+    public void sendMessageToTopic(PushNotificationRequest request)
+            throws InterruptedException, ExecutionException {
+        Message message = getPreconfiguredMessageToTopic(request);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonOutput = gson.toJson(message);
+        String response = sendAndGetResponse(message);
+        //  logger.info("Sent message to token. Device token: " + request.getToken() + ", " + response+ " msg "+jsonOutput);
+    }
+
+    private Message getPreconfiguredMessageToTopic(PushNotificationRequest request) {
+        return getPreconfiguredMessageBuilder(request).setTopic(request.getTopic()).putAllData(request.getData())
+                .build();
+    }
 }

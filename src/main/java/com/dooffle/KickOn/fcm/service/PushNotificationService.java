@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class PushNotificationService {
-	
-    private Logger logger = LoggerFactory.getLogger(PushNotificationService.class);
-    
-    private FCMService fcmService;
+
+    private final Logger logger = LoggerFactory.getLogger(PushNotificationService.class);
+
+    private final FCMService fcmService;
 
     @Autowired
     private DeviceService deviceService;
@@ -27,18 +27,18 @@ public class PushNotificationService {
     public PushNotificationService(FCMService fcmService) {
         this.fcmService = fcmService;
     }
-    
-    
+
+
     public void sendPushNotificationToToken(PushNotificationRequest request) {
         try {
-            if(request.getToken()==null){
-                Set<String> devices= deviceService.getDeviceIdUsingUserId(request.getUserId());
+            if (request.getToken() == null) {
+                Set<String> devices = deviceService.getDeviceIdUsingUserId(request.getUserId());
                 for (String x : devices) {
                     request.setToken(x);
                     fcmService.sendMessageToToken(request);
                 }
 
-            }else {
+            } else {
                 fcmService.sendMessageToToken(request);
             }
 
@@ -64,5 +64,16 @@ public class PushNotificationService {
             logger.error(e.getMessage());
         }
         return null;
+    }
+
+    public void sendPushNotificationToTopic(PushNotificationRequest request) {
+        try {
+
+            fcmService.sendMessageToTopic(request);
+
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
     }
 }
