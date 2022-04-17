@@ -93,8 +93,8 @@ public class SearchServiceImpl implements SearchService{
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
                     "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
-                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
-                    "FROM EVENT_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = et.EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE as et \n" +
                     "WHERE type = '"+type+"' AND EVENT_ID ="+id+
                     " UNION\n" +
                     "SELECT NAME,\n" +
@@ -104,8 +104,8 @@ public class SearchServiceImpl implements SearchService{
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
                     "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
-                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
-                    "FROM EVENT_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = et.EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE  as et \n" +
                     "WHERE type = '"+type+"' AND EVENT_ID ="+id+
 
                     " ORDER BY ID DESC" ;

@@ -24,7 +24,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -51,6 +57,7 @@ public class EventServiceImpl implements EventService{
     public EventDto createEvent(EventDto eventDto) {
         EventEntity eventEntity = ObjectMapperUtils.map(eventDto,EventEntity.class);
         eventEntity.setCreatedBy(CommonUtil.getLoggedInUserId());
+        eventEntity.setCreatedOn(Calendar.getInstance());
         eventEntity = eventRepository.save(eventEntity);
         if(eventDto.getAmenitiesIds()!=null){
             Set<AmenitiesEntity> amenitiesEntities = new HashSet<>(amenitiesRepository.findAllById(eventDto.getAmenitiesIds()));
@@ -61,7 +68,7 @@ public class EventServiceImpl implements EventService{
             fileService.updateEventId(eventDto.getBannerIds(), eventEntity.getEventId());
         }
         EventDto responseDto = ObjectMapperUtils.map(eventEntity, EventDto.class);
-        responseDto.setBanners(fileService.getBannersByEventId(eventDto.getEventId()));
+        responseDto.setBanners(fileService.getBannersByEventId(responseDto.getEventId()));
         notificationService.sendNotificationToTopic(responseDto);
         return responseDto;
     }
@@ -71,10 +78,24 @@ public class EventServiceImpl implements EventService{
         List<EventEntity> eventEntities = new ArrayList<>();
         Pageable sortedByEventId =
                 PageRequest.of(start, end, Sort.by("eventId").descending());
+        Pageable sortedByDate =
+                PageRequest.of(start, end, Sort.by("date").ascending());
+        Node rootNode = new RSQLParser().parse(search);
+        Specification<EventEntity> spec = rootNode.accept(new CustomRsqlVisitor<EventEntity>());
+
         if(search!=null){
-            Node rootNode = new RSQLParser().parse(search);
-            Specification<EventEntity> spec = rootNode.accept(new CustomRsqlVisitor<EventEntity>());
-            eventEntities = eventRepository.findAll(spec, sortedByEventId).toList();
+            if(search.contains("type==")){
+                Calendar yesterday= Calendar.getInstance();
+                yesterday.add(Calendar.DATE, -1);
+                String type=Constants.TRIAL;
+                if(search.contains(Constants.TOURNAMENT)){
+                    type=Constants.TOURNAMENT;
+                }
+                eventEntities = eventRepository.findAllByTypeAndDateAfter(type, yesterday, sortedByDate).toList();
+            }else{
+                eventEntities = eventRepository.findAll(spec, sortedByEventId).toList();
+            }
+
         }else{
             eventEntities = eventRepository.findAll(sortedByEventId).toList();
         }

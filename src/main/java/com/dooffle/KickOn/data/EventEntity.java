@@ -59,6 +59,8 @@ public class EventEntity implements Serializable {
     private Integer likes = 0;
     @Column
     private String createdBy;
+    @Column
+    private Calendar createdOn;
 
 
 }

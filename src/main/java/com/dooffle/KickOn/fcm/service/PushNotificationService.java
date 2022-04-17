@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,9 @@ public class PushNotificationService {
 
 
     public void sendPushNotificationToToken(PushNotificationRequest request) {
+        HashMap<String,String> data = new HashMap<>();
+        data.put("Key","value");
+        request.setData(data);
         try {
             if (request.getToken() == null) {
                 Set<String> devices = deviceService.getDeviceIdUsingUserId(request.getUserId());
@@ -69,8 +73,7 @@ public class PushNotificationService {
     public void sendPushNotificationToTopic(PushNotificationRequest request) {
         try {
 
-            fcmService.sendMessageToTopic(request);
-
+             fcmService.sendMessageToTopic(request);
 
         } catch (Exception e) {
             logger.error(e.getMessage());

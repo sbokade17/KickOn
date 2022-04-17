@@ -30,14 +30,19 @@ public class FileController {
     FileService fileService;
 
     @PostMapping("/upload")
-    public FileDto uploadImage(@RequestParam("file")MultipartFile multipartFile) throws IOException{
-        FileDto fileDto = new FileDto();
-        fileDto.setName(multipartFile.getOriginalFilename());
-        fileDto.setType(multipartFile.getContentType());
-        fileDto.setUserId(CommonUtil.getLoggedInUserId());
-        fileDto.setFileByte(multipartFile.getBytes());
-        FileDto file = fileService.saveToDB(fileDto);
-        return ObjectMapperUtils.map(file, FileDto.class);
+    public FileDto uploadImage(@RequestParam("file")MultipartFile multipartFile) {
+        try {
+            FileDto fileDto = new FileDto();
+            fileDto.setName(multipartFile.getOriginalFilename());
+            fileDto.setType(multipartFile.getContentType());
+            fileDto.setUserId(CommonUtil.getLoggedInUserId());
+            fileDto.setFileByte(multipartFile.getBytes());
+            FileDto file = fileService.saveToDB(fileDto);
+            return ObjectMapperUtils.map(file, FileDto.class);
+        } catch (Exception e) {
+           throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY,e.getMessage());
+        }
+
     }
 
     @GetMapping(value = "/{fileId}", produces = MediaType.MULTIPART_FORM_DATA_VALUE)

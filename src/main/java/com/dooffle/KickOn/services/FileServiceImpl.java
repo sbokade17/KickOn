@@ -30,10 +30,15 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileDto saveToDB(FileDto fileDto) {
-        fileDto.setFileByte(CommonUtil.compressBytes(fileDto.getFileByte()));
-        FileEntity fileEntity= ObjectMapperUtils.map(fileDto, FileEntity.class);
-        fileEntity= fileRepository.save(fileEntity);
-        return ObjectMapperUtils.map(fileEntity, FileDto.class);
+        try{
+            fileDto.setFileByte(CommonUtil.compressBytes(fileDto.getFileByte()));
+            FileEntity fileEntity= ObjectMapperUtils.map(fileDto, FileEntity.class);
+            fileEntity= fileRepository.save(fileEntity);
+            return ObjectMapperUtils.map(fileEntity, FileDto.class);
+        }catch (RuntimeException re){
+            throw new CustomAppException(HttpStatus.BAD_REQUEST, re.getMessage());
+        }
+
     }
 
     @Override

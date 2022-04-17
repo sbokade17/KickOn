@@ -1,6 +1,7 @@
 package com.dooffle.KickOn.fcm.service;
 
 import com.dooffle.KickOn.dto.EventDto;
+import com.dooffle.KickOn.dto.SearchDto;
 import com.dooffle.KickOn.models.PushNotificationRequest;
 import com.dooffle.KickOn.services.SearchService;
 import com.dooffle.KickOn.utils.Constants;
@@ -9,7 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -34,7 +38,20 @@ public class NotificationServiceImpl implements NotificationService {
             notificationRequest.setTitle("New "+responseDto.getType()+" posted in your area");
 
             ObjectMapper mapObject = new ObjectMapper();
-            Map < String, String > mapObj = mapObject.convertValue(searchService.getSingleSearch(responseDto.getType(),responseDto.getEventId()), Map.class);
+
+                Map<String, String> mapObj = new HashMap<>();
+            SearchDto data = searchService.getSingleSearch(responseDto.getType(),responseDto.getEventId());
+            mapObj.put("name", data.getName());
+            mapObj.put("type", data.getType());
+            mapObj.put("id", data.getId());
+            mapObj.put("image", data.getImage()==null ? "" : data.getImage());
+            String strdate = null;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            if (data.getDate() != null) {
+                strdate = sdf.format(data.getDate().getTime());
+            }
+            mapObj.put("date", strdate);
+            mapObj.put("link", data.getLink());
             notificationRequest.setData(mapObj);
             pushNotificationService.sendPushNotificationToTopic(notificationRequest);
         }
