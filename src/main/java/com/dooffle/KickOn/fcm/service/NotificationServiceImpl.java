@@ -45,6 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
             mapObj.put("type", data.getType());
             mapObj.put("id", data.getId());
             mapObj.put("image", data.getImage()==null ? "" : data.getImage());
+            mapObj.put("description",responseDto.getDescription());
             String strdate = null;
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             if (data.getDate() != null) {
