@@ -3,10 +3,7 @@ package com.dooffle.KickOn.controllers;
 
 import com.dooffle.KickOn.dto.*;
 import com.dooffle.KickOn.exception.CustomAppException;
-import com.dooffle.KickOn.models.CreateUserDetailsModel;
-import com.dooffle.KickOn.models.CreateUserResponseModel;
-import com.dooffle.KickOn.models.GetUserDetailsResponseModel;
-import com.dooffle.KickOn.models.ValidateOtpRequestModel;
+import com.dooffle.KickOn.models.*;
 import com.dooffle.KickOn.services.DeviceService;
 import com.dooffle.KickOn.services.UserService;
 import com.dooffle.KickOn.utils.CommonUtil;
@@ -58,13 +55,13 @@ public class UsersController {
 
 
     @PostMapping(value = "device")
-    public ResponseEntity<String> updateDevice(@RequestBody String deviceId) {
+    public ResponseEntity<StatusDto> updateDevice(@RequestBody InputModel input) {
 
         try{
-            deviceService.saveDevice(CommonUtil.getLoggedInUserId(), deviceId);
-            return ResponseEntity.status(HttpStatus.OK).body("Success");
+            deviceService.saveDevice(CommonUtil.getLoggedInUserId(), input.getInput());
+            return ResponseEntity.status(HttpStatus.OK).body(new StatusDto(Constants.SUCCESS));
         }catch (RuntimeException re){
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Error");
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new StatusDto(Constants.FAILED));
         }
 
     }
