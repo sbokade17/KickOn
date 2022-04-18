@@ -49,4 +49,10 @@ public class LocationServiceImpl implements LocationService{
             throw new CustomAppException(HttpStatus.NOT_FOUND, "Location with Id " + locationId + " not found!");
         }
     }
+
+    @Override
+    public List<LocationDto> addLocations(List<LocationDto> locationDtos) {
+        List<LocationEntity> locationEntities = ObjectMapperUtils.mapAll(locationDtos, LocationEntity.class);
+        return ObjectMapperUtils.mapAll(locationRepository.saveAll(locationEntities),LocationDto.class);
+    }
 }

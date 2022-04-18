@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +31,20 @@ public class LocationController {
     @PostMapping
     public ResponseEntity<LocationDto> addLocation(@RequestBody LocationDto location){
         LocationDto locationDto = locationService.addLocation(location);
+        return ResponseEntity.status(HttpStatus.OK).body(locationDto);
+    }
+
+    @PostMapping(value = "all")
+    public ResponseEntity<List<LocationDto>> addLocation(@RequestBody List<String> locations){
+        List<LocationDto> locationDtos = new ArrayList<>();
+        locations.forEach(x->{
+            LocationDto dto = new LocationDto();
+            dto.setLatitude(0.0);
+            dto.setLongitude(0.0);
+            dto.setLocName(x);
+            locationDtos.add(dto);
+        });
+        List<LocationDto> locationDto = locationService.addLocations(locationDtos);
         return ResponseEntity.status(HttpStatus.OK).body(locationDto);
     }
 

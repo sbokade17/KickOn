@@ -80,11 +80,12 @@ public class EventServiceImpl implements EventService{
                 PageRequest.of(start, end, Sort.by("eventId").descending());
         Pageable sortedByDate =
                 PageRequest.of(start, end, Sort.by("date").ascending());
-        Node rootNode = new RSQLParser().parse(search);
-        Specification<EventEntity> spec = rootNode.accept(new CustomRsqlVisitor<EventEntity>());
+
 
         if(search!=null){
-            if(search.contains("type==")){
+            Node rootNode = new RSQLParser().parse(search);
+            Specification<EventEntity> spec = rootNode.accept(new CustomRsqlVisitor<EventEntity>());
+            if(search.contains("type=="+Constants.TOURNAMENT) || search.contains("type=="+Constants.TRIAL)){
                 Calendar yesterday= Calendar.getInstance();
                 yesterday.add(Calendar.DATE, -1);
                 String type=Constants.TRIAL;

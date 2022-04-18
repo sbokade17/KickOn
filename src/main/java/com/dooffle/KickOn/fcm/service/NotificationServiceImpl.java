@@ -3,6 +3,7 @@ package com.dooffle.KickOn.fcm.service;
 import com.dooffle.KickOn.dto.EventDto;
 import com.dooffle.KickOn.dto.SearchDto;
 import com.dooffle.KickOn.models.PushNotificationRequest;
+import com.dooffle.KickOn.services.LocationService;
 import com.dooffle.KickOn.services.SearchService;
 import com.dooffle.KickOn.utils.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,13 +28,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private SearchService searchService;
 
+    @Autowired
+    private LocationService locationService;
+
 
     @Override
     public void sendNotificationToTopic(EventDto responseDto) {
         if(responseDto.getType().equals(Constants.TRIAL) || responseDto.getType().equals(Constants.TOURNAMENT)){
 
             PushNotificationRequest notificationRequest = new PushNotificationRequest();
-            notificationRequest.setTopic(responseDto.getLocation());
+            notificationRequest.setTopic(locationService.findById(Long.parseLong(responseDto.getLocation())).getLocName());
             notificationRequest.setMessage("Tap to see details");
             notificationRequest.setTitle("New "+responseDto.getType()+" posted in your area");
 
