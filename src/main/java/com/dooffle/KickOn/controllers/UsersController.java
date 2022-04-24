@@ -86,15 +86,16 @@ public class UsersController {
     }
 
     @GetMapping(value = "/{emailId}/otp")
-    public ResponseEntity<StatusDto> getOtp(@PathVariable("emailId") String userInput) throws NoSuchMethodException {
+    public ResponseEntity<StatusDto> getOtp(@PathVariable("emailId") String userInput,
+                                            @RequestParam(value = "reset", required = false,  defaultValue = "false") boolean reset) throws NoSuchMethodException {
 
         if (userInput == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new StatusDto(Constants.FAILED));
         }
         if (userInput.contains("@")) {
-            userService.sendOtpOnMail(userInput);
+            userService.sendOtpOnMail(userInput, reset);
         } else {
-            userService.sendOtpOnMobile(userInput);
+            userService.sendOtpOnMobile(userInput, reset);
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new StatusDto(Constants.SUCCESS));

@@ -119,8 +119,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void sendOtpOnMail(String userInput) {
+    public void sendOtpOnMail(String userInput, boolean reset) {
         //UserDto userDto=getUserDetailsByEmail(userInput);
+
+        UserDto userDto=getUserDetailsByEmailWithoutException(userInput);
+        if(userDto==null && reset){
+            throw new CustomAppException(HttpStatus.BAD_REQUEST, "User is not registered.");
+        }
+        if(userDto!=null && !reset){
+            throw new CustomAppException(HttpStatus.BAD_REQUEST, "User already registered.");
+        }
+
         OtpEntity otpEntity=otpRepository.findByEmail(userInput);
 
         if(null!=otpEntity && otpEntity.getValidity().before(Calendar.getInstance())){
@@ -150,8 +159,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void sendOtpOnMobile(String userInput) throws NoSuchMethodException {
-
+    public void sendOtpOnMobile(String userInput, boolean reset) throws NoSuchMethodException {
+        UserDto userDto=getUserDetailsByEmailWithoutException(userInput);
+        if(userDto==null && reset){
+            throw new CustomAppException(HttpStatus.BAD_REQUEST, "User is not registered.");
+        }
+        if(userDto!=null && !reset){
+            throw new CustomAppException(HttpStatus.BAD_REQUEST, "User already registered.");
+        }
 
         OtpEntity otpEntity=otpRepository.findByMobile(userInput);
 
@@ -172,7 +187,6 @@ public class UserServiceImpl implements UserService {
 
         RestTemplate restTemplate = new RestTemplate();
         Map result = restTemplate.getForObject(uri, Map.class);
-        System.out.println(result.keySet());
     }
 
     @Override

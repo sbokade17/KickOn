@@ -39,8 +39,8 @@ public class SearchServiceImpl implements SearchService{
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
                     "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
-                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
-                    "FROM EVENT_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = et.EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE as et \n" +
                     "WHERE LOWER(NAME) like LOWER('%"+search+"%')\n" +
                     "UNION\n" +
                     "SELECT NAME,\n" +
@@ -50,8 +50,8 @@ public class SearchServiceImpl implements SearchService{
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
                     "\t\t\t\t\t\t\t\tFROM FILE_TABLE\n" +
-                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
-                    "FROM EVENT_TABLE\n" +
+                    "\t\t\t\t\t\t\t\tWHERE FILE_TABLE.EVENT_ID = et.EVENT_ID) AS CHARACTER VARYING(255)) AS IMAGE, DATE\n" +
+                    "FROM EVENT_TABLE as et \n" +
                     "WHERE LOWER(DESCRIPTION) like LOWER('%"+search+"%')\n" +
                     "UNION\n" +
                     "SELECT TITLE AS NAME,\n" +
@@ -59,7 +59,7 @@ public class SearchServiceImpl implements SearchService{
                     "\tFEED_ID AS ID,\n" +
                     "\tLINK AS LINK,\n" +
                     "\tIMAGE_URL AS IMAGE, DATE\n" +
-                    "FROM FEED_TABLE\n" +
+                    "FROM FEED_TABLE \n" +
                     "WHERE LOWER(TITLE) like LOWER('%"+search+"%')\n" +
                     " ORDER BY ID DESC" ;
 

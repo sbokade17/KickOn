@@ -14,9 +14,9 @@ public interface UserService extends UserDetailsService {
 
     UserDto getUserDetailsByEmailWithoutException(String email);
 
-    void sendOtpOnMail(String userInput);
+    void sendOtpOnMail(String userInput, boolean reset);
 
-    void sendOtpOnMobile(String userInput) throws NoSuchMethodException;
+    void sendOtpOnMobile(String userInput, boolean reset) throws NoSuchMethodException;
 
     UserDto validateOtp(OtpDto otpDto);
 
