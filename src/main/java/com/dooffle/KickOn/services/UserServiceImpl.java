@@ -172,21 +172,27 @@ public class UserServiceImpl implements UserService {
 
         if(null!=otpEntity && otpEntity.getValidity().before(Calendar.getInstance())){
             otpRepository.deleteById(otpEntity.getId());
+            otpEntity=null;
         }
 
-        String otp=CommonUtil.getRandomNumberString();
-        otpEntity = new OtpEntity();
-        otpEntity.setOtp(otp);
-        otpEntity.setMobile(userInput);
-        otpEntity.setEmail("NA");
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, 5);
-        otpEntity.setValidity(calendar); //5 minutes validity
-        otpRepository.save(otpEntity);
-        final String uri = "http://smslogin.pcexpert.in/api/mt/SendSMS?DCS=0&flashsms=0&user=kickon&password=846342&senderid=KICKON&channel=Trans&number="+userInput+"&text=Welcome User, Use "+otp+" to kick start the World of Football. Please do not share this OTP. Team KickOn Football&route=67";
+        if(null==otpEntity){
+            String otp=CommonUtil.getRandomNumberString();
+            otpEntity = new OtpEntity();
+            otpEntity.setOtp(otp);
+            otpEntity.setMobile(userInput);
+            otpEntity.setEmail("NA");
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.MINUTE, 5);
+            otpEntity.setValidity(calendar); //5 minutes validity
+            otpRepository.save(otpEntity);
+            final String uri = "http://smslogin.pcexpert.in/api/mt/SendSMS?DCS=0&flashsms=0&user=kickon&password=846342&senderid=KICKON&channel=Trans&number="+userInput+"&text=Welcome User, Use "+otp+" to kick start the World of Football. Please do not share this OTP. Team KickOn Football&route=67";
 
-        RestTemplate restTemplate = new RestTemplate();
-        Map result = restTemplate.getForObject(uri, Map.class);
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getForObject(uri, Map.class);
+        }else{
+            throw new CustomAppException(HttpStatus.BAD_REQUEST, "OTP already sent to User.");
+        }
+
     }
 
     @Override

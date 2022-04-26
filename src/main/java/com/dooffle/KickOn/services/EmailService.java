@@ -95,8 +95,12 @@ public class EmailService {
         map.put("name",firstName);
         map.put("otp",otp);
 
-        sendMail(email, "OTP", "Use OTP:"+otp);
+        //sendMail(email, "OTP", "Use OTP:"+otp);
 
-        // sendTemplateMail(email, "OTP to reset password", "reset_password.ftlh", map);
+        try {
+            sendTemplateMail(email, "OTP from KickOn", "verify_account.ftlh", map);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
     }
 }
