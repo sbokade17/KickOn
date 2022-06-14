@@ -6,6 +6,8 @@ import com.dooffle.KickOn.data.LikeEntity;
 import com.dooffle.KickOn.dto.CategoriesDto;
 import com.dooffle.KickOn.dto.FeedDto;
 import com.dooffle.KickOn.exception.CustomAppException;
+import com.dooffle.KickOn.fcm.service.NotificationService;
+import com.dooffle.KickOn.fcm.service.PushNotificationService;
 import com.dooffle.KickOn.repository.FeedCategoryRepository;
 import com.dooffle.KickOn.repository.FeedRepository;
 import com.dooffle.KickOn.repository.LikeRepository;
@@ -36,6 +38,9 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     FeedCategoryRepository feedCategoryRepository;
 
+    @Autowired
+    PushNotificationService notificationService;
+
     @Override
     public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String keyword, int start, int end) {
         try {
@@ -44,6 +49,11 @@ public class FeedServiceImpl implements FeedService {
             Set<String> existingFeeds = feeds.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedDto> feedsToBeAddedToDB = feedDtos.stream().filter(x -> !existingFeeds.contains(x.getLink())).collect(Collectors.toList());
             feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
+            try{
+                notificationService.sendNewFeedNotification(feedsToBeAddedToDB);
+            }catch (RuntimeException re){
+
+            }
             List<FeedEntity> results;
             Pageable sortedByDate =
                     PageRequest.of(start, end, Sort.by("date").descending());
@@ -127,5 +137,16 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public List<CategoriesDto> getAllCategories() {
         return ObjectMapperUtils.mapAll(feedCategoryRepository.findAll(),CategoriesDto.class);
+    }
+
+    @Override
+    public List<FeedDto> getFeedsByCategoryIn(String category, int start, int end) {
+        List<FeedEntity> results;
+        Pageable sortedByDate =
+                PageRequest.of(start, end, Sort.by("date").descending());
+
+            results = feedRepository.findByKeywordsContaining(category, sortedByDate);
+
+        return ObjectMapperUtils.mapAll(results, FeedDto.class);
     }
 }

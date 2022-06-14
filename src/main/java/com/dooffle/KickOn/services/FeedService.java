@@ -17,4 +17,6 @@ public interface FeedService {
     String getFeedsUrl(String category);
 
     List<CategoriesDto> getAllCategories();
+
+    List<FeedDto> getFeedsByCategoryIn(String category, int start, int end);
 }

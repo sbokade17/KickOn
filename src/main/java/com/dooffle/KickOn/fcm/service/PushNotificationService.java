@@ -1,5 +1,6 @@
 package com.dooffle.KickOn.fcm.service;
 
+import com.dooffle.KickOn.dto.FeedDto;
 import com.dooffle.KickOn.models.PushNotificationRequest;
 import com.dooffle.KickOn.services.DeviceService;
 import com.dooffle.KickOn.utils.CommonUtil;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -78,5 +80,8 @@ public class PushNotificationService {
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    public void sendNewFeedNotification(List<FeedDto> feedsToBeAddedToDB) {
     }
 }

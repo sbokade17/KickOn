@@ -13,4 +13,6 @@ public interface FeedRepository extends JpaRepository<FeedEntity, Long> {
     List<FeedEntity> findByLinkIn(Set<String> urlSet, Pageable sortedByDate);
 
     List<FeedEntity> findByLinkInAndKeywordsContaining(Set<String> urlSet, String category, Pageable sortedByDate);
+
+    List<FeedEntity> findByKeywordsContaining(String category, Pageable sortedByDate);
 }

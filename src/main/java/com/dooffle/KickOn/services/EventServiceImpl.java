@@ -4,6 +4,7 @@ import com.dooffle.KickOn.data.AmenitiesEntity;
 import com.dooffle.KickOn.data.EventEntity;
 import com.dooffle.KickOn.data.LikeEntity;
 import com.dooffle.KickOn.dto.EventDto;
+import com.dooffle.KickOn.dto.FeedDto;
 import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.fcm.service.NotificationService;
 import com.dooffle.KickOn.repository.AmenitiesRepository;
@@ -13,6 +14,7 @@ import com.dooffle.KickOn.rsql.CustomRsqlVisitor;
 import com.dooffle.KickOn.utils.CommonUtil;
 import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,9 @@ public class EventServiceImpl implements EventService{
 
     @Autowired
     NotificationService notificationService;
+    
+    @Autowired
+    FeedService feedService;
 
     @Override
     @Transactional
@@ -192,6 +197,26 @@ public class EventServiceImpl implements EventService{
     @Override
     public void addShare(Long id) {
 
+    }
+
+    @Override
+    public List<Map> getAllEventsWithNews(int start, int end) {
+        List<EventDto> events = getAllEvents(null, start, end);
+        List<String> categories = Arrays.asList("Transfer", "World Cup");
+        List<FeedDto> feeds = new ArrayList<>();
+        categories.stream().forEach(x->{
+                feeds.addAll(feedService.getFeedsByCategoryIn(x, start/(3*categories.size()), end/(3*categories.size())));
+        });
+        List<Map> result = new ArrayList<>();
+        for(int i=0;i< events.size();i++){
+            ObjectMapper oMapper = new ObjectMapper();
+            if(i%3==0 && i>0 && feeds.size()>i/3){
+
+                result.add(oMapper.convertValue(feeds.get((i/3)-1), Map.class));
+            }
+            result.add(oMapper.convertValue(events.get(i), Map.class));
+        }
+        return result;
     }
 
 

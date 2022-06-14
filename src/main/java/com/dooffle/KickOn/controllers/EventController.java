@@ -61,6 +61,14 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.OK).body(eventDtos);
     }
 
+    @GetMapping(value = "/allWithNews")
+    public ResponseEntity<List<Map>> getAllEventsWithNews(@RequestParam(value = "start", required = false,  defaultValue = "0") int start,
+                                                       @RequestParam(value = "end", required = false,  defaultValue = "9") int end){
+
+        List<Map> eventDtos = eventService.getAllEventsWithNews(start,end);
+        return ResponseEntity.status(HttpStatus.OK).body(eventDtos);
+    }
+
     @GetMapping("/{eventId}")
     public ResponseEntity<EventDto> getEventById(@PathVariable("eventId") Long eventId) throws IOException {
         try{

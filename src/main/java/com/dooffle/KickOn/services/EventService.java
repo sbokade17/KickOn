@@ -21,4 +21,6 @@ public interface EventService {
     void removeLike(Long id);
 
     void addShare(Long id);
+
+    List<Map> getAllEventsWithNews(int start, int end);
 }
