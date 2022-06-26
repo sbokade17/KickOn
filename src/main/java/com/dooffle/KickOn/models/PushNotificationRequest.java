@@ -19,5 +19,6 @@ public class PushNotificationRequest {
     private String image;
     private String userId;
     private Map data;
+    private String condition;
 
 }

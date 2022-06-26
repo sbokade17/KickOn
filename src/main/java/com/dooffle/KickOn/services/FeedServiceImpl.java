@@ -7,13 +7,13 @@ import com.dooffle.KickOn.dto.CategoriesDto;
 import com.dooffle.KickOn.dto.FeedDto;
 import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.fcm.service.NotificationService;
-import com.dooffle.KickOn.fcm.service.PushNotificationService;
 import com.dooffle.KickOn.repository.FeedCategoryRepository;
 import com.dooffle.KickOn.repository.FeedRepository;
 import com.dooffle.KickOn.repository.LikeRepository;
 import com.dooffle.KickOn.utils.CommonUtil;
 import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,12 +21,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 public class FeedServiceImpl implements FeedService {
 
     @Autowired
@@ -39,7 +43,10 @@ public class FeedServiceImpl implements FeedService {
     FeedCategoryRepository feedCategoryRepository;
 
     @Autowired
-    PushNotificationService notificationService;
+    NotificationService notificationService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String keyword, int start, int end) {
@@ -49,21 +56,22 @@ public class FeedServiceImpl implements FeedService {
             Set<String> existingFeeds = feeds.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedDto> feedsToBeAddedToDB = feedDtos.stream().filter(x -> !existingFeeds.contains(x.getLink())).collect(Collectors.toList());
             feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
-            try{
+            try {
                 notificationService.sendNewFeedNotification(feedsToBeAddedToDB);
-            }catch (RuntimeException re){
-
+            } catch (RuntimeException re) {
+                log.error("Error while sending notification");
+                log.error(re.getMessage());
             }
             List<FeedEntity> results;
             Pageable sortedByDate =
                     PageRequest.of(start, end, Sort.by("date").descending());
-            if(keyword==null){
+            if (keyword == null) {
                 results = feedRepository.findByLinkIn(urlSet, sortedByDate);
-            }else {
-                results = feedRepository.findByLinkInAndKeywordsContaining(urlSet,keyword, sortedByDate);
+            } else {
+                results = feedRepository.findByLinkInAndKeywordsContaining(urlSet, keyword, sortedByDate);
             }
             List<FeedDto> resultsDto = ObjectMapperUtils.mapAll(results, FeedDto.class);
-            resultsDto.forEach(x->{
+            resultsDto.forEach(x -> {
                 x.setLiked(likeRepository.findByFeedIdAndUserIdAndType(x.getFeedId(), CommonUtil.getLoggedInUserId(), Constants.FEED).isPresent());
             });
             return resultsDto;
@@ -78,10 +86,10 @@ public class FeedServiceImpl implements FeedService {
         try {
 
 
-            if(!likeRepository.findByFeedIdAndUserIdAndType(id, CommonUtil.getLoggedInUserId(), Constants.FEED).isPresent()){
+            if (!likeRepository.findByFeedIdAndUserIdAndType(id, CommonUtil.getLoggedInUserId(), Constants.FEED).isPresent()) {
 
                 FeedEntity feedEntity = feedRepository.findById(id).get();
-                feedEntity.setLikes(feedEntity.getLikes() == null ? 1: feedEntity.getLikes()+ 1);
+                feedEntity.setLikes(feedEntity.getLikes() == null ? 1 : feedEntity.getLikes() + 1);
                 feedRepository.save(feedEntity);
 
                 LikeEntity like = new LikeEntity();
@@ -89,6 +97,31 @@ public class FeedServiceImpl implements FeedService {
                 like.setUserId(CommonUtil.getLoggedInUserId());
                 like.setType(Constants.FEED);
                 likeRepository.save(like);
+
+
+                String[] keywords = feedEntity.getKeywords().split(",");
+                Arrays.stream(keywords).forEach(k -> {
+                    try {
+                        String queryString = "select user_id from\n" +
+                                "(SELECT l.user_id, count(*) as likes, '" + k + "' as keyword\n" +
+                                "FROM FEED_TABLE F\n" +
+                                "JOIN LIKE_TABLE L ON F.FEED_ID = L.FEED_ID\n" +
+                                "where f.keywords like '%" + k + "%'\n" +
+                                "group by l.user_id) as table1 where likes= 3";
+                        Query query = entityManager.createNativeQuery(
+                                queryString
+                        );
+                        List<String> devices = query.getResultList();
+                        if (devices.size() > 0) {
+                            notificationService.subscribeCurrentUserToTopic(k);
+                        }
+                    } catch (CustomAppException e) {
+                        log.error("Error while subscribing to topic {}", k);
+                        log.error(e.getMessage());
+                    }
+                });
+
+
             }
 
         } catch (RuntimeException re) {
@@ -115,10 +148,10 @@ public class FeedServiceImpl implements FeedService {
         try {
             Optional<LikeEntity> likeOp = likeRepository.findByFeedIdAndUserIdAndType(id, CommonUtil.getLoggedInUserId(), Constants.FEED);
 
-            if(likeOp.isPresent()){
+            if (likeOp.isPresent()) {
 
                 FeedEntity feedEntity = feedRepository.findById(id).get();
-                feedEntity.setLikes(feedEntity.getLikes()- 1);
+                feedEntity.setLikes(feedEntity.getLikes() - 1);
                 feedRepository.save(feedEntity);
                 likeRepository.delete(likeOp.get());
             }
@@ -136,7 +169,7 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public List<CategoriesDto> getAllCategories() {
-        return ObjectMapperUtils.mapAll(feedCategoryRepository.findAll(),CategoriesDto.class);
+        return ObjectMapperUtils.mapAll(feedCategoryRepository.findAll(), CategoriesDto.class);
     }
 
     @Override
@@ -145,7 +178,7 @@ public class FeedServiceImpl implements FeedService {
         Pageable sortedByDate =
                 PageRequest.of(start, end, Sort.by("date").descending());
 
-            results = feedRepository.findByKeywordsContaining(category, sortedByDate);
+        results = feedRepository.findByKeywordsContaining(category, sortedByDate);
 
         return ObjectMapperUtils.mapAll(results, FeedDto.class);
     }

@@ -88,4 +88,19 @@ public class FCMService {
         return getPreconfiguredMessageBuilder(request).setTopic(request.getTopic()).putAllData(request.getData())
                 .build();
     }
+
+    public void sendMessageToDevices(List<String> deviceIds) {
+    }
+
+    public void sendMessageToCondition(PushNotificationRequest request) throws ExecutionException, InterruptedException {
+        Message message = getPreconfiguredMessageToCondition(request);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonOutput = gson.toJson(message);
+        String response = sendAndGetResponse(message);
+    }
+
+    private Message getPreconfiguredMessageToCondition(PushNotificationRequest request) {
+        return getPreconfiguredMessageBuilder(request).setCondition(request.getCondition()).putAllData(request.getData())
+                .build();
+    }
 }

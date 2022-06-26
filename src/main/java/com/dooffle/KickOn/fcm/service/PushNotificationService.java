@@ -62,10 +62,10 @@ public class PushNotificationService {
         sendPushNotificationToToken(request);
     }
 
-    public TopicManagementResponse subscribeToTopic(String locName) {
+    public TopicManagementResponse subscribeToTopic(String topicName) {
         Set<String> device = deviceService.getDeviceIdUsingUserId(CommonUtil.getLoggedInUserId());
         try {
-            return fcmService.subscribeToTopic(device.stream().collect(Collectors.toList()), locName);
+            return fcmService.subscribeToTopic(device.stream().collect(Collectors.toList()), topicName);
         } catch (FirebaseMessagingException e) {
             logger.error(e.getMessage());
         }
@@ -75,13 +75,25 @@ public class PushNotificationService {
     public void sendPushNotificationToTopic(PushNotificationRequest request) {
         try {
 
-             fcmService.sendMessageToTopic(request);
+                if(request.getTopic()!=null){
+                    fcmService.sendMessageToTopic(request);
+                }else {
+                    fcmService.sendMessageToCondition(request);
+                }
+
 
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
     }
 
-    public void sendNewFeedNotification(List<FeedDto> feedsToBeAddedToDB) {
+    public void sendNotificationToDevices(List<String> deviceIds) {
+        try {
+
+            fcmService.sendMessageToDevices(deviceIds);
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
     }
 }
