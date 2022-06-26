@@ -17,6 +17,10 @@ public class CommonUtil {
         return (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    public static boolean isAdmin(){
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ADMIN");
+    }
+
     public static String getRandomNumberString() {
         // It will generate 6 digit random Number.
         // from 0 to 999999

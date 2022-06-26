@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 public interface EventRepository extends JpaRepository<EventEntity, Long>, JpaSpecificationExecutor<EventEntity> {
     Optional<EventEntity> findByEventIdAndCreatedBy(Long eventId, String loggedInUserId);
 
-    void deleteByEventIdAndCreatedBy(Long eventId, String loggedInUserId);
+    int deleteByEventIdAndCreatedBy(Long eventId, String loggedInUserId);
 
     Page findAllByTypeAndDateAfter(String tournament, Calendar instance, Pageable sortedByEventId);
 
     Page findAllByTypeAndDateBefore(String tournament, Calendar instance, Pageable sortedByEventId);
+
+    int deleteByEventId(Long eventId);
 }

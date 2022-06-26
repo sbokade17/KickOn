@@ -17,6 +17,7 @@ import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.ast.Node;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,7 @@ import java.util.*;
 
 @Service
 @Transactional
+@Slf4j
 public class EventServiceImpl implements EventService{
 
     @Autowired
@@ -117,7 +119,13 @@ public class EventServiceImpl implements EventService{
     @Override
     public void deleteById(Long eventId) {
         try {
-            eventRepository.deleteByEventIdAndCreatedBy(eventId, CommonUtil.getLoggedInUserId());
+             if(CommonUtil.isAdmin()){
+                 eventRepository.deleteByEventId(eventId);
+             }else {
+                 eventRepository.deleteByEventIdAndCreatedBy(eventId, CommonUtil.getLoggedInUserId());
+             }
+
+
         } catch (RuntimeException e) {
             throw new CustomAppException(HttpStatus.NOT_FOUND, "Event with Id " + eventId + " not found!");
         }

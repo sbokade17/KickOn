@@ -55,7 +55,8 @@ public class FeedServiceImpl implements FeedService {
             List<FeedEntity> feeds = feedRepository.findAllByLinkIn(urlSet);
             Set<String> existingFeeds = feeds.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedDto> feedsToBeAddedToDB = feedDtos.stream().filter(x -> !existingFeeds.contains(x.getLink())).collect(Collectors.toList());
-            feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
+            List<FeedEntity> feedsAdded = feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
+            feedsToBeAddedToDB = ObjectMapperUtils.mapAll(feedsAdded, FeedDto.class);
             try {
                 notificationService.sendNewFeedNotification(feedsToBeAddedToDB);
             } catch (RuntimeException re) {
@@ -100,6 +101,7 @@ public class FeedServiceImpl implements FeedService {
 
 
                 String[] keywords = feedEntity.getKeywords().split(",");
+                //log.info(String.valueOf(keywords.length));
                 Arrays.stream(keywords).forEach(k -> {
                     try {
                         String queryString = "select user_id from\n" +
@@ -111,11 +113,13 @@ public class FeedServiceImpl implements FeedService {
                         Query query = entityManager.createNativeQuery(
                                 queryString
                         );
+                        //log.info("Query is : {}",queryString);
                         List<String> devices = query.getResultList();
+                        //log.info("Devices size is {}",devices.size());
                         if (devices.size() > 0) {
                             notificationService.subscribeCurrentUserToTopic(k);
                         }
-                    } catch (CustomAppException e) {
+                    } catch (RuntimeException e) {
                         log.error("Error while subscribing to topic {}", k);
                         log.error(e.getMessage());
                     }
@@ -125,6 +129,8 @@ public class FeedServiceImpl implements FeedService {
             }
 
         } catch (RuntimeException re) {
+            log.error("Error while adding like");
+            log.error(re.getMessage());
             throw new CustomAppException(HttpStatus.UNPROCESSABLE_ENTITY, "Error while adding like");
         }
 
