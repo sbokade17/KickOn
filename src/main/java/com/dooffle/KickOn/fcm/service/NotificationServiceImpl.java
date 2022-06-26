@@ -85,8 +85,22 @@ public class NotificationServiceImpl implements NotificationService {
             String condition = sb.substring(0, sb.length() - 3);
             //'stock-GOOG' in topics || 'industry-tech' in topics
             request.setCondition(condition);
-            ObjectMapper oMapper = new ObjectMapper();
-            request.setData(oMapper.convertValue(x, Map.class));
+            SearchDto data = searchService.getSingleSearch(Constants.FEED, x.getFeedId());
+            ObjectMapper mapObject = new ObjectMapper();
+            Map<String, String> mapObj = new HashMap<>();
+            mapObj.put("name", data.getName());
+            mapObj.put("type", data.getType());
+            mapObj.put("id", data.getId());
+            mapObj.put("image", data.getImage() == null ? "" : data.getImage());
+            mapObj.put("description", x.getTitle());
+            String strdate = null;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            if (data.getDate() != null) {
+                strdate = sdf.format(data.getDate().getTime());
+            }
+            mapObj.put("date", strdate);
+            mapObj.put("link", data.getLink());
+            request.setData(mapObj);
             request.setMessage("Tap to see details");
             request.setTitle(x.getTitle());
             pushNotificationService.sendPushNotificationToTopic(request);

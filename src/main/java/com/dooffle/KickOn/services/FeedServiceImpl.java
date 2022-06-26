@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @Slf4j
 public class FeedServiceImpl implements FeedService {
 
@@ -49,6 +48,7 @@ public class FeedServiceImpl implements FeedService {
     private EntityManager entityManager;
 
     @Override
+    @Transactional
     public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String keyword, int start, int end) {
         try {
             Set<String> urlSet = feedDtos.stream().map(x -> x.getLink()).collect(Collectors.toSet());
