@@ -2,15 +2,9 @@ package com.dooffle.KickOn.controllers;
 
 import com.dooffle.KickOn.dto.EventDto;
 import com.dooffle.KickOn.dto.StatusDto;
-import com.dooffle.KickOn.dto.UserDto;
 import com.dooffle.KickOn.exception.CustomAppException;
-import com.dooffle.KickOn.models.GetUserDetailsResponseModel;
 import com.dooffle.KickOn.services.EventService;
-import com.dooffle.KickOn.utils.CommonUtil;
 import com.dooffle.KickOn.utils.Constants;
-import com.dooffle.KickOn.utils.ObjectMapperUtils;
-import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.ast.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +57,7 @@ public class EventController {
 
     @GetMapping(value = "/allWithNews")
     public ResponseEntity<List<Map>> getAllEventsWithNews(@RequestParam(value = "start", required = false,  defaultValue = "0") int start,
-                                                       @RequestParam(value = "end", required = false,  defaultValue = "9") int end){
+                                                                          @RequestParam(value = "end", required = false,  defaultValue = "9") int end){
 
         List<Map> eventDtos = eventService.getAllEventsWithNews(start,end);
         return ResponseEntity.status(HttpStatus.OK).body(eventDtos);

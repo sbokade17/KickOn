@@ -63,9 +63,10 @@ public class PushNotificationService {
     }
 
     public TopicManagementResponse subscribeToTopic(String topicName) {
+        String validatedTopic= topicName.replaceAll(" ","_");
         Set<String> device = deviceService.getDeviceIdUsingUserId(CommonUtil.getLoggedInUserId());
         try {
-            return fcmService.subscribeToTopic(device.stream().collect(Collectors.toList()), topicName);
+            return fcmService.subscribeToTopic(device.stream().collect(Collectors.toList()), validatedTopic);
         } catch (FirebaseMessagingException e) {
             logger.error(e.getMessage());
         }
@@ -76,6 +77,7 @@ public class PushNotificationService {
         try {
 
                 if(request.getTopic()!=null){
+                    request.setTopic(request.getTopic().replaceAll(" ",""));
                     fcmService.sendMessageToTopic(request);
                 }else {
                     fcmService.sendMessageToCondition(request);

@@ -35,6 +35,7 @@ public class SearchServiceImpl implements SearchService{
             String queryString= "SELECT NAME,\n" +
                     "\tTYPE,\n" +
                     "\tEVENT_ID AS ID,\n" +
+                    "\tLOCATION,\n" +
                     "\t'' AS LINK,\n" +
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
@@ -46,6 +47,7 @@ public class SearchServiceImpl implements SearchService{
                     "SELECT NAME,\n" +
                     "\tTYPE,\n" +
                     "\tEVENT_ID AS ID,\n" +
+                    "\tLOCATION,\n" +
                     "    '' AS LINK,\n" +
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
@@ -57,6 +59,7 @@ public class SearchServiceImpl implements SearchService{
                     "SELECT TITLE AS NAME,\n" +
                     "\t'Feed' AS TYPE,\n" +
                     "\tFEED_ID AS ID,\n" +
+                    "\t'' AS LOCATION,\n" +
                     "\tLINK AS LINK,\n" +
                     "\tIMAGE_URL AS IMAGE, DATE\n" +
                     "FROM FEED_TABLE \n" +
@@ -73,6 +76,7 @@ public class SearchServiceImpl implements SearchService{
                     .addScalar("image", StringType.INSTANCE)
                     .addScalar("date", CalendarType.INSTANCE)
                     .addScalar("link", StringType.INSTANCE)
+                    .addScalar("location", StringType.INSTANCE)
                     .setResultTransformer(Transformers.aliasToBean(SearchDto.class));
 
             return query.getResultList();
@@ -89,6 +93,7 @@ public class SearchServiceImpl implements SearchService{
             String queryString= "SELECT NAME,\n" +
                     "\tTYPE,\n" +
                     "\tEVENT_ID AS ID,\n" +
+                    "\tLOCATION,\n" +
                     "\t'' AS LINK,\n" +
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
@@ -100,6 +105,7 @@ public class SearchServiceImpl implements SearchService{
                     "SELECT NAME,\n" +
                     "\tTYPE,\n" +
                     "\tEVENT_ID AS ID,\n" +
+                    "\tLOCATION,\n" +
                     "    '' AS LINK,\n" +
                     "\tCAST(\n" +
                     "\t\t\t\t\t\t\t(SELECT MIN(ID)\n" +
@@ -120,6 +126,7 @@ public class SearchServiceImpl implements SearchService{
                     .addScalar("image", StringType.INSTANCE)
                     .addScalar("date", CalendarType.INSTANCE)
                     .addScalar("link", StringType.INSTANCE)
+                    .addScalar("location", StringType.INSTANCE)
                     .setResultTransformer(Transformers.aliasToBean(SearchDto.class));
 
             List<SearchDto> result = query.getResultList();

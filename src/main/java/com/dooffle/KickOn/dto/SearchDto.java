@@ -18,4 +18,5 @@ public class SearchDto {
     private String image;
     private Calendar date;
     private String link;
+    private String location;
 }

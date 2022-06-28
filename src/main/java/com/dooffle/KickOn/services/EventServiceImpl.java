@@ -27,13 +27,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -219,10 +213,13 @@ public class EventServiceImpl implements EventService{
         for(int i=0;i< events.size();i++){
             ObjectMapper oMapper = new ObjectMapper();
             if(i%3==0 && i>0 && feeds.size()>i/3){
-
-                result.add(oMapper.convertValue(feeds.get((i/3)-1), Map.class));
+                Map obj = oMapper.convertValue(feeds.get((i / 3) - 1), Map.class);
+                obj.put("date",(Calendar)feeds.get(i/3).getDate());
+                result.add(obj);
             }
-            result.add(oMapper.convertValue(events.get(i), Map.class));
+            Map obj = oMapper.convertValue(events.get(i), Map.class);
+            obj.put("date",events.get(i).getDate());
+            result.add(obj);
         }
         return result;
     }

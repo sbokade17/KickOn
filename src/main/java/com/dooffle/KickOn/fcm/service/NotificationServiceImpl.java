@@ -50,7 +50,7 @@ public class NotificationServiceImpl implements NotificationService {
 
             ObjectMapper mapObject = new ObjectMapper();
 
-            Map<String, String> mapObj = new HashMap<>();
+            Map<String, Object> mapObj = new HashMap<>();
             SearchDto data = searchService.getSingleSearch(responseDto.getType(), responseDto.getEventId());
             mapObj.put("name", data.getName());
             mapObj.put("type", data.getType());
