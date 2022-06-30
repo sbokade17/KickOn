@@ -356,6 +356,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setLocationId(locationId.toString());
         userRepository.save(userEntity);
         notificationService.subscribeToTopic(locationDto.getLocName());
+        notificationService.subscribeToTopic("ALL");
         return locationDto;
     }
 

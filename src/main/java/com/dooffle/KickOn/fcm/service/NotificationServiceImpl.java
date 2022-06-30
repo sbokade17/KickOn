@@ -75,35 +75,40 @@ public class NotificationServiceImpl implements NotificationService {
 
 
         feedsToBeAddedToDB.forEach(x -> {
+            if(x.getFeedId()%5==0){
 
-            String[] keywords = x.getKeywords().split(",");
-            StringBuilder sb = new StringBuilder();
-            Arrays.stream(keywords).forEach(k -> {
-                sb.append("'").append(k).append("' in topics  || ");
-            });
-            PushNotificationRequest request = new PushNotificationRequest();
-            String condition = sb.substring(0, sb.length() - 3);
-            //'stock-GOOG' in topics || 'industry-tech' in topics
-            request.setCondition(condition);
-            SearchDto data = searchService.getSingleSearch(Constants.FEED, x.getFeedId());
-            ObjectMapper mapObject = new ObjectMapper();
-            Map<String, String> mapObj = new HashMap<>();
-            mapObj.put("name", data.getName());
-            mapObj.put("type", data.getType());
-            mapObj.put("id", data.getId());
-            mapObj.put("image", data.getImage() == null ? "" : data.getImage());
-            mapObj.put("description", x.getTitle());
-            String strdate = null;
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            if (data.getDate() != null) {
-                strdate = sdf.format(data.getDate().getTime());
+//            String[] keywords = x.getKeywords().split(",");
+//            StringBuilder sb = new StringBuilder();
+//            Arrays.stream(keywords).forEach(k -> {
+//                sb.append("'").append(k.replaceAll(" ","")).append("' in topics  || ");
+//            });
+
+//            String condition = sb.substring(0, sb.length() - 3);
+                //'stock-GOOG' in topics || 'industry-tech' in topics
+                PushNotificationRequest request = new PushNotificationRequest();
+//            request.setCondition(condition);
+                request.setTopic("ALL");
+                SearchDto data = searchService.getSingleSearch(Constants.FEED, x.getFeedId());
+                ObjectMapper mapObject = new ObjectMapper();
+                Map<String, String> mapObj = new HashMap<>();
+                mapObj.put("name", data.getName());
+                mapObj.put("type", data.getType());
+                mapObj.put("id", data.getId());
+                mapObj.put("image", data.getImage() == null ? "" : data.getImage());
+                mapObj.put("description", x.getTitle());
+                String strdate = null;
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                if (data.getDate() != null) {
+                    strdate = sdf.format(data.getDate().getTime());
+                }
+                mapObj.put("date", strdate);
+                mapObj.put("link", data.getLink());
+                request.setData(mapObj);
+                request.setMessage("Tap to see details");
+                request.setTitle(x.getTitle());
+                pushNotificationService.sendPushNotificationToTopic(request);
+
             }
-            mapObj.put("date", strdate);
-            mapObj.put("link", data.getLink());
-            request.setData(mapObj);
-            request.setMessage("Tap to see details");
-            request.setTitle(x.getTitle());
-            pushNotificationService.sendPushNotificationToTopic(request);
 
         });
 

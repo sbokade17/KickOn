@@ -1,10 +1,12 @@
 package com.dooffle.KickOn.utils;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Random;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -18,7 +20,9 @@ public class CommonUtil {
     }
 
     public static boolean isAdmin(){
-        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ADMIN");
+
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(r -> r.getAuthority().equals("ADMIN"));
     }
 
     public static String getRandomNumberString() {

@@ -31,7 +31,6 @@ import javax.transaction.Transactional;
 import java.util.*;
 
 @Service
-@Transactional
 @Slf4j
 public class EventServiceImpl implements EventService{
 
@@ -114,7 +113,7 @@ public class EventServiceImpl implements EventService{
     public void deleteById(Long eventId) {
         try {
              if(CommonUtil.isAdmin()){
-                 eventRepository.deleteByEventId(eventId);
+                 eventRepository.deleteById(eventId);
              }else {
                  eventRepository.deleteByEventIdAndCreatedBy(eventId, CommonUtil.getLoggedInUserId());
              }
@@ -140,6 +139,7 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
+    @Transactional
     public void addLike(Long id) {
         try {
 
