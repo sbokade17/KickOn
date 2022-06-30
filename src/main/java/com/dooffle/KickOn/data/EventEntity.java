@@ -40,7 +40,7 @@ public class EventEntity implements Serializable {
     @Column
     private String registerLink;
 
-    @ManyToMany(fetch = FetchType.EAGER,
+    @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE

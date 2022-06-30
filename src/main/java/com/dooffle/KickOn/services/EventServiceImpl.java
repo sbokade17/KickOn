@@ -114,6 +114,7 @@ public class EventServiceImpl implements EventService{
         try {
              if(CommonUtil.isAdmin()){
                  eventRepository.deleteById(eventId);
+                 //eventRepository.deleteByEventId(eventId);
              }else {
                  eventRepository.deleteByEventIdAndCreatedBy(eventId, CommonUtil.getLoggedInUserId());
              }
