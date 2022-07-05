@@ -52,6 +52,7 @@ public class EventServiceImpl implements EventService{
     @Autowired
     FeedService feedService;
 
+
     @Override
     @Transactional
     public EventDto createEvent(EventDto eventDto) {
@@ -208,7 +209,7 @@ public class EventServiceImpl implements EventService{
         List<String> categories = Arrays.asList("Transfer", "World Cup");
         List<FeedDto> feeds = new ArrayList<>();
         categories.stream().forEach(x->{
-                feeds.addAll(feedService.getFeedsByCategoryIn(x, start/(3*categories.size()), end/(3*categories.size())));
+                feeds.addAll(feedService.getFeedsByCategoryIn(x, start, end/(3*categories.size())));
         });
         List<Map> result = new ArrayList<>();
         for(int i=0;i< events.size();i++){

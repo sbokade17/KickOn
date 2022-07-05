@@ -88,21 +88,20 @@ public class NotificationServiceImpl implements NotificationService {
                 PushNotificationRequest request = new PushNotificationRequest();
 //            request.setCondition(condition);
                 request.setTopic("ALL");
-                SearchDto data = searchService.getSingleSearch(Constants.FEED, x.getFeedId());
+                //SearchDto data = searchService.getSingleSearch(Constants.FEED, x.getFeedId());
                 ObjectMapper mapObject = new ObjectMapper();
                 Map<String, String> mapObj = new HashMap<>();
-                mapObj.put("name", data.getName());
-                mapObj.put("type", data.getType());
-                mapObj.put("id", data.getId());
-                mapObj.put("image", data.getImage() == null ? "" : data.getImage());
-                mapObj.put("description", x.getTitle());
+                mapObj.put("name", x.getTitle());
+                mapObj.put("type", Constants.FEED);
+                mapObj.put("id", x.getFeedId().toString());
+                mapObj.put("image", x.getImageUrl() == null ? "" : x.getImageUrl());
                 String strdate = null;
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                if (data.getDate() != null) {
-                    strdate = sdf.format(data.getDate().getTime());
+                if (x.getDate() != null) {
+                    strdate = sdf.format(x.getDate().getTime());
                 }
                 mapObj.put("date", strdate);
-                mapObj.put("link", data.getLink());
+                mapObj.put("link", x.getLink());
                 request.setData(mapObj);
                 request.setMessage("Tap to see details");
                 request.setTitle(x.getTitle());

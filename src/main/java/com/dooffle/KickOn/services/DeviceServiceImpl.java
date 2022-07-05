@@ -2,6 +2,7 @@ package com.dooffle.KickOn.services;
 
 
 import com.dooffle.KickOn.data.DeviceEntity;
+import com.dooffle.KickOn.fcm.service.PushNotificationService;
 import com.dooffle.KickOn.repository.DeviceRepository;
 import com.dooffle.KickOn.utils.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class DeviceServiceImpl implements DeviceService{
     @Autowired
     private DeviceRepository deviceRepository;
 
+    @Autowired
+    PushNotificationService notificationService;
+
     @Override
     public void saveDevice(String userId, String deviceId) {
         DeviceEntity deviceEntity = deviceRepository.findByUserIdAndDeviceId(userId, deviceId);
@@ -26,6 +30,12 @@ public class DeviceServiceImpl implements DeviceService{
             deviceEntity.setDeviceId(deviceId);
             deviceRepository.save(deviceEntity);
         }
+        try{
+            notificationService.subscribeToTopic("ALL");
+        }catch (RuntimeException re){
+
+        }
+
     }
 
     @Override

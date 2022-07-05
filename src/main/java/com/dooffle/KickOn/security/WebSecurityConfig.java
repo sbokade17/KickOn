@@ -42,10 +42,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**");
+                registry.addMapping("/**")
+                        .allowedMethods("GET", "POST", "DELETE", "PATCH", "OPTIONS");
             }
         };
     }
+
+//    @Bean
+//    CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("*"));
+//        configuration.setAllowedMethods(Arrays.asList("GET","POST","DELETE","PATCH"));
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
 
     @Override
@@ -59,7 +70,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
-        http.cors().and().authorizeRequests()
+        //http.addFilterBefore(corsFilter, SessionManagementFilter.class);
+        http.cors()
+                .and().authorizeRequests()
                 .antMatchers(HttpMethod.POST, environment.getProperty("registerUrl.path")).permitAll()
                 .antMatchers(HttpMethod.POST, environment.getProperty("loginUrl.path")).permitAll()
                 .antMatchers(HttpMethod.POST, environment.getProperty("validateGoogle.path")).permitAll()

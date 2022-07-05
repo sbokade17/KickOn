@@ -2,6 +2,7 @@ package com.dooffle.KickOn.services;
 
 import com.dooffle.KickOn.data.FeedCategoryEntity;
 import com.dooffle.KickOn.data.FeedEntity;
+import com.dooffle.KickOn.data.FeedViewEntity;
 import com.dooffle.KickOn.data.LikeEntity;
 import com.dooffle.KickOn.dto.CategoriesDto;
 import com.dooffle.KickOn.dto.FeedDto;
@@ -9,11 +10,15 @@ import com.dooffle.KickOn.exception.CustomAppException;
 import com.dooffle.KickOn.fcm.service.NotificationService;
 import com.dooffle.KickOn.repository.FeedCategoryRepository;
 import com.dooffle.KickOn.repository.FeedRepository;
+import com.dooffle.KickOn.repository.FeedViewRepository;
 import com.dooffle.KickOn.repository.LikeRepository;
 import com.dooffle.KickOn.utils.CommonUtil;
 import com.dooffle.KickOn.utils.Constants;
 import com.dooffle.KickOn.utils.ObjectMapperUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +30,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,17 +56,27 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     NotificationService notificationService;
 
+
+    @Autowired
+    FeedViewRepository feedViewRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
     @Transactional
-    public List<FeedDto> addAndGetFeeds(List<FeedDto> feedDtos, String keyword, int start, int end) {
+    public List<FeedDto> addAndGetFeeds(String keyword, int start, int end, String category) {
+        List<FeedDto> feedDtos = getFeedsByCategoryName(category);
         try {
+
             Set<String> urlSet = feedDtos.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedEntity> feeds = feedRepository.findAllByLinkIn(urlSet);
             Set<String> existingFeeds = feeds.stream().map(x -> x.getLink()).collect(Collectors.toSet());
             List<FeedDto> feedsToBeAddedToDB = feedDtos.stream().filter(x -> !existingFeeds.contains(x.getLink())).collect(Collectors.toList());
+            feedsToBeAddedToDB.forEach(x->{
+                x.setKeywords(x.getKeywords()+","+category);
+                System.out.println(x.getKeywords());
+            });
             List<FeedEntity> feedsAdded = feedRepository.saveAll(ObjectMapperUtils.mapAll(feedsToBeAddedToDB, FeedEntity.class));
             feedsToBeAddedToDB = ObjectMapperUtils.mapAll(feedsAdded, FeedDto.class);
             try {
@@ -78,8 +100,9 @@ public class FeedServiceImpl implements FeedService {
             return resultsDto;
         } catch (RuntimeException re) {
             re.printStackTrace();
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
+
     }
 
     @Override
@@ -142,6 +165,11 @@ public class FeedServiceImpl implements FeedService {
             FeedEntity feedEntity = feedRepository.findById(id).get();
             FeedDto feedDto = ObjectMapperUtils.map(feedEntity, FeedDto.class);
             feedDto.setLiked(likeRepository.findByFeedIdAndUserIdAndType(feedEntity.getFeedId(), CommonUtil.getLoggedInUserId(), Constants.FEED).isPresent());
+
+            FeedViewEntity view = new FeedViewEntity();
+            view.setFeedId(id);
+            view.setUserId(CommonUtil.getLoggedInUserId());
+            feedViewRepository.save(view);
             return feedDto;
 
         } catch (RuntimeException re) {
@@ -187,5 +215,62 @@ public class FeedServiceImpl implements FeedService {
         results = feedRepository.findByKeywordsContaining(category, sortedByDate);
 
         return ObjectMapperUtils.mapAll(results, FeedDto.class);
+    }
+
+
+    public List<FeedDto> getFeedsByCategoryName(String category) {
+        List<FeedDto> feedDtos = new ArrayList<>();
+        String url = getFeedsUrl(category);
+        //
+        String xmlString = readUrlToString(url);
+        JSONObject xmlJSONObj = XML.toJSONObject(xmlString);
+        JSONArray postList = xmlJSONObj.getJSONObject("rss").getJSONObject("channel").getJSONArray("item");
+        postList.forEach(x->{
+            FeedDto feedDto = new FeedDto();
+            feedDto.setKeywords(((JSONObject)x).getString("keywords"));
+            feedDto.setContent(((JSONObject)x).getString("content:encoded"));
+            feedDto.setLikes(0);
+            Calendar cal = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.ENGLISH);
+            try {
+                cal.setTime(sdf.parse(((JSONObject)x).getString("pubDate")));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            feedDto.setDate(cal);
+            feedDto.setTitle(((JSONObject)x).getString("title"));
+            feedDto.setLink(((JSONObject)x).getString("link")+"/partners/45111");
+            feedDto.setImageUrl(((JSONObject)x).getJSONObject("media:thumbnail").getString("url"));
+            feedDtos.add(feedDto);
+        });
+        return feedDtos;
+    }
+
+    public static String readUrlToString(String url) {
+        BufferedReader reader = null;
+        String result = null;
+        try {
+            URL u = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+            conn.setRequestMethod("GET");
+            conn.setDoOutput(true);
+            conn.setReadTimeout(2 * 1000);
+            conn.connect();
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line).append("\n");
+            }
+            result = builder.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try { reader.close(); } catch (IOException ignoreOnClose) { }
+            }
+        }
+        return result;
     }
 }

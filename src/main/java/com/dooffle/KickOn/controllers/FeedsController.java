@@ -66,64 +66,16 @@ public class FeedsController {
                                     @RequestParam(value = "keyword", required = false) String keyword,
                                     @RequestParam(value = "start", required = false,  defaultValue = "0") int start,
                                     @RequestParam(value = "end", required = false,  defaultValue = "50") int end) throws IOException {
-        List<FeedDto> feedDtos = new ArrayList<>();
+
 
         try {
-            String url = feedService.getFeedsUrl(category);
-                    //
-            String xmlString = readUrlToString(url);
-            JSONObject xmlJSONObj = XML.toJSONObject(xmlString);
-            JSONArray postList = xmlJSONObj.getJSONObject("rss").getJSONObject("channel").getJSONArray("item");
-            postList.forEach(x->{
-                FeedDto feedDto = new FeedDto();
-                feedDto.setKeywords(((JSONObject)x).getString("keywords"));
-                feedDto.setContent(((JSONObject)x).getString("content:encoded"));
-                feedDto.setLikes(0);
-                Calendar cal = Calendar.getInstance();
-                SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.ENGLISH);
-                try {
-                    cal.setTime(sdf.parse(((JSONObject)x).getString("pubDate")));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                feedDto.setDate(cal);
-                feedDto.setTitle(((JSONObject)x).getString("title"));
-                feedDto.setLink(((JSONObject)x).getString("link")+"/partners/45111");
-                feedDto.setImageUrl(((JSONObject)x).getJSONObject("media:thumbnail").getString("url"));
-                feedDtos.add(feedDto);
-            });
-            return feedService.addAndGetFeeds(feedDtos, keyword, start, end);
+            return feedService.addAndGetFeeds(keyword, start, end, category);
         }  catch (Exception e) {
             e.printStackTrace();
+            return new ArrayList<>();
         }
-        return feedDtos;
+
     }
 
-    public static String readUrlToString(String url) {
-        BufferedReader reader = null;
-        String result = null;
-        try {
-            URL u = new URL(url);
-            HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-            conn.setRequestMethod("GET");
-            conn.setDoOutput(true);
-            conn.setReadTimeout(2 * 1000);
-            conn.connect();
-            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line).append("\n");
-            }
-            result = builder.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try { reader.close(); } catch (IOException ignoreOnClose) { }
-            }
-        }
-        return result;
-    }
+
 }
