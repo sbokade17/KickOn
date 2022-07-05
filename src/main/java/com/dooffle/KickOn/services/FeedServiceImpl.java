@@ -123,30 +123,7 @@ public class FeedServiceImpl implements FeedService {
                 likeRepository.save(like);
 
 
-                String[] keywords = feedEntity.getKeywords().split(",");
-                //log.info(String.valueOf(keywords.length));
-                Arrays.stream(keywords).forEach(k -> {
-                    try {
-                        String queryString = "select user_id from\n" +
-                                "(SELECT l.user_id, count(*) as likes, '" + k + "' as keyword\n" +
-                                "FROM FEED_TABLE F\n" +
-                                "JOIN LIKE_TABLE L ON F.FEED_ID = L.FEED_ID\n" +
-                                "where f.keywords like '%" + k + "%'\n" +
-                                "group by l.user_id) as table1 where likes= 3";
-                        Query query = entityManager.createNativeQuery(
-                                queryString
-                        );
-                        //log.info("Query is : {}",queryString);
-                        List<String> devices = query.getResultList();
-                        //log.info("Devices size is {}",devices.size());
-                        if (devices.size() > 0) {
-                            notificationService.subscribeCurrentUserToTopic(k);
-                        }
-                    } catch (RuntimeException e) {
-                        log.error("Error while subscribing to topic {}", k);
-                        log.error(e.getMessage());
-                    }
-                });
+
 
 
             }
@@ -170,6 +147,34 @@ public class FeedServiceImpl implements FeedService {
             view.setFeedId(id);
             view.setUserId(CommonUtil.getLoggedInUserId());
             feedViewRepository.save(view);
+
+            String[] keywords = feedEntity.getKeywords().split(",");
+            //log.info(String.valueOf(keywords.length));
+            Arrays.stream(keywords).forEach(k -> {
+                try {
+                    String queryString = "select cat_count from (\n" +
+                            "\tselect category, count(category) as cat_count from \n" +
+                            "\t(SELECT UNNEST(STRING_TO_ARRAY(F.KEYWORDS,',')) AS CATEGORY\n" +
+                            "FROM FEED_VIEW_TABLE FV\n" +
+                            "JOIN FEED_TABLE F ON F.FEED_ID = FV.FEED_ID\n" +
+                            "\twhere FV.USER_ID = '"+CommonUtil.getLoggedInUserId()+"') AS cat\n" +
+                            "WHERE category ='"+k+"'\n" +
+                            "group by category) as c";
+                    Query query = entityManager.createNativeQuery(
+                            queryString
+                    );
+                    //log.info("Query is : {}",queryString);
+                    int count = query.getFirstResult();
+                    //log.info("Devices size is {}",devices.size());
+                    if (count == 3) {
+                        notificationService.subscribeCurrentUserToTopic(k);
+                    }
+                } catch (RuntimeException e) {
+                    log.error("Error while subscribing to topic {}", k);
+                    log.error(e.getMessage());
+                }
+            });
+
             return feedDto;
 
         } catch (RuntimeException re) {
@@ -216,6 +221,30 @@ public class FeedServiceImpl implements FeedService {
 
         return ObjectMapperUtils.mapAll(results, FeedDto.class);
     }
+
+    @Override
+    public List<String> getPersonalisedCategories() {
+        String queryString = "select category from (select category, count(category) as cat_count from (SELECT UNNEST(STRING_TO_ARRAY(F.KEYWORDS,',')) AS CATEGORY\n" +
+                "FROM FEED_VIEW_TABLE FV\n" +
+                "JOIN FEED_TABLE F ON F.FEED_ID = FV.FEED_ID\n" +
+                "WHERE FV.USER_ID = '"+CommonUtil.getLoggedInUserId()+"') AS cat\n" +
+                "WHERE category not in ('All')\n" +
+                "group by category\n" +
+                "order by cat_count desc limit 3) as c";
+        Query query = entityManager.createNativeQuery(
+                queryString
+        );
+        //log.info("Query is : {}",queryString);
+        List<String> devices = query.getResultList();
+        return devices;
+    }
+
+//    @Override
+//    public List<FeedDto> getPersonalisedFeeds() {
+//        List<FeedEntity> results = new ArrayList<>();
+//        String queryString= "";
+//        return ObjectMapperUtils.mapAll(results, FeedDto.class);
+//    }
 
 
     public List<FeedDto> getFeedsByCategoryName(String category) {

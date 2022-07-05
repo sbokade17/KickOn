@@ -1,6 +1,5 @@
 package com.dooffle.KickOn.fcm.service;
 
-import com.dooffle.KickOn.dto.FeedDto;
 import com.dooffle.KickOn.models.PushNotificationRequest;
 import com.dooffle.KickOn.services.DeviceService;
 import com.dooffle.KickOn.utils.CommonUtil;

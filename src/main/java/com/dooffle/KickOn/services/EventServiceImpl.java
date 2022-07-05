@@ -206,7 +206,7 @@ public class EventServiceImpl implements EventService{
     @Override
     public List<Map> getAllEventsWithNews(int start, int end) {
         List<EventDto> events = getAllEvents(null, start, end);
-        List<String> categories = Arrays.asList("Transfer", "World Cup");
+        List<String> categories = feedService.getPersonalisedCategories();
         List<FeedDto> feeds = new ArrayList<>();
         categories.stream().forEach(x->{
                 feeds.addAll(feedService.getFeedsByCategoryIn(x, start, end/(3*categories.size())));

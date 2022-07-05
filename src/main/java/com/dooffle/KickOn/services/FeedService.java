@@ -20,4 +20,5 @@ public interface FeedService {
 
     List<FeedDto> getFeedsByCategoryIn(String category, int start, int end);
 
+    List<String> getPersonalisedCategories();
 }
